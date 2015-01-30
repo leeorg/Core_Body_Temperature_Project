@@ -2,10 +2,13 @@
 #
 # Lee Organick 
 # Steiner Lab
-# This code processes mice data.
 #
 #
-# 1-12-14
+# 1-29-14
+
+##import cProfile, pstats, StringIO
+##pr = cProfile.Profile()
+##pr.enable()
 
 import csv
 import numpy as np
@@ -482,7 +485,7 @@ def make_organized_time_temp_list(last_four_days, times, mouse_list, all_times_d
     (time point, avg CBT for given mice) tuples organized by time point."""
     day_to_tt_dict = make_time_to_temps_dict(last_four_days, times, mouse_list, all_times_dic)
     time_pt_tuples_list = avg_each_time_CBT(day_to_tt_dict, last_four_days)
-    organized_tts_list = sort_list_of_time_pt_tuples(time_pt_tuples_list)
+    organized_tts_list = sorted(time_pt_tuples_list)
     return organized_tts_list
 
 def make_time_to_temps_dict(last_four_days, times, mouse_list, all_times_dic):
@@ -528,16 +531,6 @@ def avg_each_time_CBT(pre_time_temps_d, day_list):
         for t in pre_time_temps_d[day]:
             avg_tt_lst.append( (t[0], np.mean(t[1])) )
     return avg_tt_lst
-
-def sort_list_of_time_pt_tuples(time_pt_tuples_list):
-    """Given a list of (time pt, temp), returns a list of these tuples in chronologic order"""
-    ###### There must be a more efficient way to sort tuples #############
-    organized_tts = []
-    for i in range(len(time_pt_tuples_list)+1):
-        for tt_tuple in time_pt_tuples_list:
-            if tt_tuple[0] == i:
-                organized_tts.append(tt_tuple)
-    return organized_tts
 
 def parse_list(any_list, sample_frequency):
     """Given a list, returns a new list where every nth tuple from the initial list is included.
@@ -612,7 +605,7 @@ def make_stdev_organized_time_temp_list(days, times, mouse_list, pre_time_temps_
     (time point, avg CBT for given mice) tuples organized by time point."""
     day_to_tt_dict = make_time_to_temps_dict(days, times, mouse_list, pre_time_temps_dic)
     time_pt_tuples_list = stdev_each_time_CBT(day_to_tt_dict, days)
-    organized_tts_list = sort_list_of_time_pt_tuples(time_pt_tuples_list)
+    organized_tts_list = sorted(time_pt_tuples_list)
     return organized_tts_list
 
 def plot_stdev_each_treatment_last_days(last_four_days_pre, last_four_days_post, times, veh_mice,
@@ -798,3 +791,10 @@ def main():
     
 if __name__ == "__main__":
     main()
+
+##pr.disable()
+##s = StringIO.StringIO()
+##sortby = 'percall'
+##ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+##ps.print_stats()
+##print s.getvalue()
