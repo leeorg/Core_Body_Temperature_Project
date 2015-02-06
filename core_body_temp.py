@@ -673,6 +673,8 @@ def overall_expt_plot_stdev(day_labels, times, veh_mice, treatment_mice, sample_
 #################
     
 def main():
+    """This is the main python code that is run in this program."""
+    
     mouse_ids = ["2 Veh Deg. C Data","2 Acyline Deg. C Data","3 Veh Deg. C Data","3 Acyline Deg. C Data",
                  "4 Veh Deg. C Data","4 Acyline Deg. C Data","6 Veh Deg. C Data", "6 Acyline Deg. C Data",
                  "7 Veh Deg. C Data","7 Acyline Deg. C Data","8 Veh Deg. C Data","8 Acyline Deg. C Data",
