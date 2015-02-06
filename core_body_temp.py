@@ -171,141 +171,72 @@ def find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic): #Ultimately
                 else:
                     print "There is no data for this cycle"
 
-def mav(CBT_list):
-    """Given a list of CBTs, returns a new list of averaged points (9 point moving averages). First
-    and last four points simply have fewer points averaged."""
+##def mav(CBT_list):
+##    """Given a list of CBTs, returns a new list of averaged points (9 point moving averages). First
+##    and last four points simply have fewer points averaged."""
+##    count = 0
+##    new = []
+##    for temp in CBT_list:
+##        count += 1
+##        if count == 1:
+##            new.append(np.mean(CBT_list[count-1:count+4]))
+##        elif count == 2:
+##            new.append(np.mean(CBT_list[count-2:count+4]))
+##        elif count == 3:
+##            new.append(np.mean(CBT_list[count-3:count+4]))
+##        elif count == 4:
+##            new.append(np.mean(CBT_list[count-4:count+4]))
+##            
+##        elif count == len(CBT_list):
+##            new.append(np.mean(CBT_list[count-5:count]))
+##        elif count == len(CBT_list) - 1:
+##            new.append(np.mean(CBT_list[count-5:count+1]))
+##        elif count == len(CBT_list) - 2:
+##            new.append(np.mean(CBT_list[count-5:count+2]))
+##        elif count == len(CBT_list) - 3:
+##            new.append(np.mean(CBT_list[count-5:count+3]))
+##        else:
+##            new.append(np.mean(CBT_list[count-5:count+4]))
+##    return new
+
+def n_pt_mavg(CBT_list, n_ints_in_mavg):
+    """Given a list of CBTs (floats) and an integer, returns a new list of averaged pts (n point
+    moving averages). First and last ten points simply have fewer points averaged.
+    NOTE- even numbered n_ints_in_mavg will take (n_ints_in_mavg/2) pts before and after the
+    selected point."""
+    left_norm = n_ints_in_mavg/2 + 1
+    right_norm = n_ints_in_mavg/2
+    new_list = []
     count = 0
-    new = []
     for temp in CBT_list:
         count += 1
-        if count == 1:
-            new.append(np.mean(CBT_list[count-1:count+4]))
-        elif count == 2:
-            new.append(np.mean(CBT_list[count-2:count+4]))
-        elif count == 3:
-            new.append(np.mean(CBT_list[count-3:count+4]))
-        elif count == 4:
-            new.append(np.mean(CBT_list[count-4:count+4]))
-            
-        elif count == len(CBT_list):
-            new.append(np.mean(CBT_list[count-5:count]))
-        elif count == len(CBT_list) - 1:
-            new.append(np.mean(CBT_list[count-5:count+1]))
-        elif count == len(CBT_list) - 2:
-            new.append(np.mean(CBT_list[count-5:count+2]))
-        elif count == len(CBT_list) - 3:
-            new.append(np.mean(CBT_list[count-5:count+3]))
+        if count <= n_ints_in_mavg/2:
+            new_list.append(np.mean(CBT_list[count-count:count+right_norm]))
+        elif count >= len(CBT_list)-right_norm:
+            new_list.append(np.mean(CBT_list[count-left_norm:len(CBT_list)]))
         else:
-            new.append(np.mean(CBT_list[count-5:count+4]))
-    return new
+            new_list.append(np.mean(CBT_list[count-left_norm:count+right_norm]))
+    return new_list
 
-def twenty_one_pt_mavg(CBT_list):
-    """Given a list of CBTs, returns a new list of averaged pts (21 point moving averages). First
-    and last ten points simply have fewer points averaged"""
+def n_moving_stdev(CBT_list, n_stdev):
+    """Given a list of CBTs (floats) and an integer, returns a new list of standard deviation of
+    selected pts (number of points used is n_stdev). First and last ten points simply have fewer points averaged.
+    NOTE- even numbered n_stdev will take (n_stdev/2) pts before and after the selected point."""
+    left_norm = n_stdev/2 + 1
+    right_norm = n_stdev/2
+    new_list = []
     count = 0
-    new = []
     for temp in CBT_list:
         count += 1
-        if count == 1:
-            new.append(np.mean(CBT_list[count-1:count+10]))
-        elif count == 2:
-            new.append(np.mean(CBT_list[count-2:count+10]))
-        elif count == 3:
-            new.append(np.mean(CBT_list[count-3:count+10]))
-        elif count == 4:
-            new.append(np.mean(CBT_list[count-4:count+10]))
-        elif count == 5:
-            new.append(np.mean(CBT_list[count-5:count+10]))
-        elif count == 6:
-            new.append(np.mean(CBT_list[count-6:count+10]))
-        elif count == 7:
-            new.append(np.mean(CBT_list[count-7:count+10]))
-        elif count == 8:
-            new.append(np.mean(CBT_list[count-8:count+10]))
-        elif count == 9:
-            new.append(np.mean(CBT_list[count-9:count+10]))
-        elif count == 10:
-            new.append(np.mean(CBT_list[count-10:count+10]))
-        elif count == len(CBT_list):
-            new.append(np.mean(CBT_list[count-11:count]))
-        elif count == len(CBT_list) - 1:
-            new.append(np.mean(CBT_list[count-11:count+1]))
-        elif count == len(CBT_list) - 2:
-            new.append(np.mean(CBT_list[count-11:count+2]))
-        elif count == len(CBT_list) - 3:
-            new.append(np.mean(CBT_list[count-11:count+3]))
-        elif count == len(CBT_list) - 4:
-            new.append(np.mean(CBT_list[count-11:count+4]))
-        elif count == len(CBT_list) - 5:
-            new.append(np.mean(CBT_list[count-11:count+5]))
-        elif count == len(CBT_list) - 6:
-            new.append(np.mean(CBT_list[count-11:count+6]))
-        elif count == len(CBT_list) - 7:
-            new.append(np.mean(CBT_list[count-11:count+7]))
-        elif count == len(CBT_list) - 8:
-            new.append(np.mean(CBT_list[count-11:count+8]))
-        elif count == len(CBT_list) - 9:
-            new.append(np.mean(CBT_list[count-11:count+9]))
-        elif count == len(CBT_list) - 10:
-            new.append(np.mean(CBT_list[count-11:count+10]))
+        if count <= n_stdev/2:
+            new_list.append(scipy.stats.tstd(CBT_list[count-count:count+right_norm]))
+        elif count >= len(CBT_list)-right_norm:
+            new_list.append(scipy.stats.tstd(CBT_list[count-left_norm:len(CBT_list)]))
         else:
-            new.append(np.mean(CBT_list[count-11:count+10]))
-    return new
+            new_list.append(scipy.stats.tstd(CBT_list[count-left_norm:count+right_norm]))
+    return new_list
 
-def twenty_one_pt_moving_stdev(CBT_list):
-    """Returns a list of the sample standard deviation of the ten points surrounding each point
-    in a list of CBTs"""
-    count = 0
-    new = []
-    for temp in CBT_list:
-        count += 1
-        if count == 1:
-            new.append(scipy.stats.tstd(CBT_list[count-1:count+10]))
-        elif count == 2:
-            new.append(scipy.stats.tstd(CBT_list[count-2:count+10]))
-        elif count == 3:
-            new.append(scipy.stats.tstd(CBT_list[count-3:count+10]))
-        elif count == 4:
-            new.append(scipy.stats.tstd(CBT_list[count-4:count+10]))
-        elif count == 5:
-            new.append(scipy.stats.tstd(CBT_list[count-5:count+10]))
-        elif count == 6:
-            new.append(scipy.stats.tstd(CBT_list[count-6:count+10]))
-        elif count == 7:
-            new.append(scipy.stats.tstd(CBT_list[count-7:count+10]))
-        elif count == 8:
-            new.append(scipy.stats.tstd(CBT_list[count-8:count+10]))
-        elif count == 9:
-            new.append(scipy.stats.tstd(CBT_list[count-9:count+10]))
-        elif count == 10:
-            new.append(scipy.stats.tstd(CBT_list[count-10:count+10]))
-        elif count == len(CBT_list):
-            new.append(scipy.stats.tstd(CBT_list[count-11:count]))
-        elif count == len(CBT_list) - 1:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+1]))
-        elif count == len(CBT_list) - 2:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+2]))
-        elif count == len(CBT_list) - 3:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+3]))
-        elif count == len(CBT_list) - 4:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+4]))
-        elif count == len(CBT_list) - 5:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+5]))
-        elif count == len(CBT_list) - 6:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+6]))
-        elif count == len(CBT_list) - 7:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+7]))
-        elif count == len(CBT_list) - 8:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+8]))
-        elif count == len(CBT_list) - 9:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+9]))
-        elif count == len(CBT_list) - 10:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+10]))
-        else:
-            new.append(scipy.stats.tstd(CBT_list[count-11:count+10]))
-    return new
-
-def plot_twenty_one_moving_stdv(day_list, mouse_list, cycle_list, master_tt_dic):
+def plot_n_moving_stdv(day_list, mouse_list, cycle_list, master_tt_dic, n_stdev):
     for day in day_list:
         for mouse in mouse_list:
             CBT_list = []
@@ -316,35 +247,35 @@ def plot_twenty_one_moving_stdv(day_list, mouse_list, cycle_list, master_tt_dic)
                 #this combines dark and light cycle for each day
                 CBT_list.extend(CBT_list_first)
                 time_list.extend(time_list_first)
-            twenty_one_stdev_lst = twenty_one_pt_moving_stdev(CBT_list)
+            stdev_lst = n_moving_stdev(CBT_list, n_stdev)
                 
-            #assert len(twenty_one_stdev_lst) == len(CBT_list)
-            #assert len(twenty_one_stdev_lst) == len(time_list)
+            #assert len(stdev_lst) == len(CBT_list)
+            #assert len(stdev_lst) == len(time_list)
             
             fig = plt.figure()
             ax = fig.gca()
             
             plt.figure()
-            plt.plot(time_list, twenty_one_stdev_lst, 'b.-')
-            plt.title("21 pt. Moving Standard Deviation %s, mouse %s" %(day, mouse))
-            plt.ylabel("21 point sample std. deviation")
+            plt.plot(time_list, stdev_lst, 'b.-')
+            plt.title("%s pt. Moving Standard Deviation %s, mouse %s" %(str(n_stdev),day, mouse))
+            plt.ylabel("%s point sample std. deviation" %(str(n_stdev))) 
             plt.xlabel("Time of Day (hrs)")
             plt.xlim(0, 24)
             plt.ylim(0, 0.6, 0.1)
             ax.set_xticks(np.arange(0,24,1)) 
             ax.set_yticks(np.arange(0,0.6, 0.1))  
             plt.grid()
-            plt.savefig("21pt_stdv_plot_%s_mouse_%s.png" %(day, mouse))
+            plt.savefig("%s_pt_stdv_plot_%s_mouse_%s.png" %(str(n_stdev),day, mouse))
             
     
-def make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic):
+def make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic, n_ints_in_mavg):
     mav_master_dic = {}
     for day in day_labels:
         mav_master_dic[day] = {}
         for mouse in mouse_nums:
             mav_master_dic[day][mouse] = {}
             for cycle in times:
-                mav_master_dic[day][mouse][cycle] = mav(list_CBT(day, mouse, cycle, master_tt_dic))
+                mav_master_dic[day][mouse][cycle] = n_pt_mavg(list_CBT(day, mouse, cycle, master_tt_dic), n_ints_in_mavg)
     return mav_master_dic
                                                                 
 def hms_to_secs(t):
@@ -456,29 +387,29 @@ def write_dic_to_csv(dic_to_map, first_label, second_label, third_label):
          w = csv.writer(f)
          w.writerows(dic_to_map.items())
 
-def get_last_two_cycles_moving_stdev(master_tt_dic, mouse): ##modify for future use (dates)
+def get_last_two_cycles_moving_stdev(master_tt_dic, mouse, n_stdev): ##modify for future use (dates)
     """Prints each cycle's average moving standard deviation for given mouse"""
     dark_cycle = []
     light_cycle = []
-    dark_cycle.extend(twenty_one_pt_moving_stdev(list_CBT('8-19-14', mouse, 'Dark Cycle', master_tt_dic)))
-    dark_cycle.extend(twenty_one_pt_moving_stdev(list_CBT('8-20-14', mouse, 'Dark Cycle', master_tt_dic)))
-    light_cycle.extend(twenty_one_pt_moving_stdev(list_CBT('8-18-14', mouse, 'Light Cycle', master_tt_dic)))
-    light_cycle.extend(twenty_one_pt_moving_stdev(list_CBT('8-19-14', mouse, 'Light Cycle', master_tt_dic)))
+    dark_cycle.extend(n_moving_stdev(list_CBT('8-19-14', mouse, 'Dark Cycle', master_tt_dic), n_stdev))
+    dark_cycle.extend(n_moving_stdev(list_CBT('8-20-14', mouse, 'Dark Cycle', master_tt_dic), n_stdev))
+    light_cycle.extend(n_moving_stdev(list_CBT('8-18-14', mouse, 'Light Cycle', master_tt_dic), n_stdev))
+    light_cycle.extend(n_moving_stdev(list_CBT('8-19-14', mouse, 'Light Cycle', master_tt_dic), n_stdev))
     print "Dark Cycle:", np.mean(dark_cycle)
     print "Light Cycle:", np.mean(light_cycle)
 
-def get_all_last_2_cycles_moving_stdev(master_tt_dic, acyline_mice, veh_mice):#later--into excel, not print
+def get_all_last_2_cycles_moving_stdev(master_tt_dic, acyline_mice, veh_mice, n_stdev):#later--into excel, not print
     """Prints each cycle's average moving standard deviation for all mice, also prints the
     treatment group the mouse belonged to"""
-    print "Acyline Mice-Avg of last two full days' 21 pt. moving stdev"
+    print "Acyline Mice-Avg of last two full days' %s pt. moving stdev" %(str(n_stdev))
     for mouse in acyline_mice:
         print "Mouse", mouse
-        get_last_two_cycles_moving_stdev(master_tt_dic, mouse)
+        get_last_two_cycles_moving_stdev(master_tt_dic, mouse, n_stdev)
         
-    print "Vehicle Mice-Avg of last two full days' 21 pt. moving stdev"
+    print "Vehicle Mice-Avg of last two full days' %s pt. moving stdev" %str((n_stdev))
     for mouse in veh_mice:
         print "Mouse", mouse
-        get_last_two_cycles_moving_stdev(master_tt_dic, mouse)
+        get_last_two_cycles_moving_stdev(master_tt_dic, mouse, n_stdev)
         
 def make_organized_time_temp_list(last_four_days, times, mouse_list, all_times_dic):
     """Given a list of days, cycles, mice, and master/all_times dict, returns a list of
@@ -716,6 +647,27 @@ def overall_expt_plot_stdev(day_labels, times, veh_mice, treatment_mice, sample_
     plt.ylabel('Stdev CBT in deg C')
     plt.savefig('stdev_temp_per_pt_entire_expt.png')
 
+##def get_all_mouse_ids():
+##    """Looks at all .csv data files and extracts the mouse ids from them"""
+##    ###ADD THIS FUNCTION###
+##
+##def extract_mouse_ids(filename):
+##    """Given a string that is a name of a data file, extracts the mouse ids from the first row of
+##    the document (by making sure they have the word "Data" in the cell). Returns a list of each
+##    unique mouse id as it appears in the file."""
+##    mouse_id_set = set()
+##    data = csv.DictReader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+##    count = 0
+##    for row in data:
+##        count += 1
+##        if count > 1:
+##            break
+##        print "row:", row
+##        for key in row:
+##            if 'Data' in key:
+##                mouse_id_set.add(key)
+##    return sorted(mouse_id_set)    
+    
 #################
 #### MAIN
 #################
@@ -732,6 +684,8 @@ def main():
                  "17 Acyline Deg. C Data", "18 Veh Deg. C Data", "18 Acyline Deg. C Data",
                  "19 Veh Deg. C Data","19 Acyline Deg. C Data","20 Veh Deg. C Data",
                  "20 Acyline Deg. C Data",]
+    
+##    mouse_ids = #get_all_mouse ids ##MAKE THIS FUNCTION##
 
     mouse_nums = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
 
@@ -771,26 +725,33 @@ def main():
     last_four_post_days = ['8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
     #throw out light cycle of 8-20 because it's not a full cycle
 
+    n_ints_in_mavg = 21
+    n_stdev = 21
+
     master_tt_dic = make_master_tt_dic(filenames, mouse_ids)
-    find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic) #modify to make excel doc, NOT print
-    mav_master_dic = make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic)
+    #find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic) #modify to make excel doc, NOT print
+    mav_master_dic = make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic, n_ints_in_mavg)
     all_avg_plots(master_tt_dic)
     
-    plot_twenty_one_moving_stdv(day_labels, all_mice, times, master_tt_dic)
+    plot_n_moving_stdv(day_labels, all_mice, times, master_tt_dic, n_stdev)
 
-    get_all_last_2_cycles_moving_stdev(master_tt_dic, acyline_mice, veh_mice)
-
+    get_all_last_2_cycles_moving_stdev(master_tt_dic, acyline_mice, veh_mice, n_stdev)
+#####################################################################################################
     all_times_dic = make_all_times_dic(filenames, mouse_ids)
+
     plot_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, veh_mice,
-                                  acyline_mice, 1, all_times_dic)
-    overall_expt_plot(day_labels, times, veh_mice, acyline_mice, 1, all_times_dic)
-    
+                                 acyline_mice, 1, all_times_dic)
+    overall_expt_plot(day_labels, times, veh_mice, acyline_mice, 1, all_times_dic) 
     plot_stdev_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, veh_mice,
                                         acyline_mice, 1, all_times_dic)
     overall_expt_plot_stdev(day_labels, times, veh_mice, acyline_mice, 1, all_times_dic)
+    #Make sample frequency a variable
+    #Make another function that does moving avg/stdev
     
 if __name__ == "__main__":
     main()
+    print
+    print "All done! Your data awaits you."
 
 ##pr.disable()
 ##s = StringIO.StringIO()
