@@ -236,7 +236,7 @@ def n_pt_mavg(CBT_list, n_ints_in_mavg):
 
 def n_moving_stdev(CBT_list, n_stdev):
     """Given a list of CBTs (floats) and an integer, returns a new list of standard deviation of
-    selected pts (number of points used is n_stdev). First and last ten points simply have fewer points averaged.
+    selected pts (number of points used is n_stdev). First and last edge points simply have fewer points averaged.
     NOTE- even numbered n_stdev will take (n_stdev/2) pts before and after the selected point."""
     left_norm = n_stdev/2 + 1
     right_norm = n_stdev/2
@@ -313,7 +313,7 @@ def get_y_axis(tt_dic, mouse, pre_post):
         y_data.append(tt[1])
     return y_data
         
-def plot_mouse(x_pre, y_pre, x_post, y_post, acyline_veh, mouse):
+def plot_mouse(x_pre, y_pre, x_post, y_post, tx1_tx2, mouse):
     """Saves a plot of CBT vs. time for given mouse in given day and cycle"""
     plt.figure()
     
@@ -414,16 +414,16 @@ def get_last_two_cycles_moving_stdev(master_tt_dic, mouse, n_stdev): ##modify fo
     print "Dark Cycle:", np.mean(dark_cycle)
     print "Light Cycle:", np.mean(light_cycle)
 
-def get_all_last_2_cycles_moving_stdev(master_tt_dic, acyline_mice, veh_mice, n_stdev):#later--into excel, not print
+def get_all_last_2_cycles_moving_stdev(master_tt_dic, tx1_mice, tx2_mice, n_stdev):#later--into excel, not print
     """Prints each cycle's average moving standard deviation for all mice, also prints the
     treatment group the mouse belonged to"""
-    print "Acyline Mice-Avg of last two full days' %s pt. moving stdev" %(str(n_stdev))
-    for mouse in acyline_mice:
+    print "Treatment 1 Mice-Avg of last two full days' %s pt. moving stdev" %(str(n_stdev))
+    for mouse in tx1_mice:
         print "Mouse", mouse
         get_last_two_cycles_moving_stdev(master_tt_dic, mouse, n_stdev)
         
-    print "Vehicle Mice-Avg of last two full days' %s pt. moving stdev" %str((n_stdev))
-    for mouse in veh_mice:
+    print "Treatment 2 Mice-Avg of last two full days' %s pt. moving stdev" %str((n_stdev))
+    for mouse in tx2_mice:
         print "Mouse", mouse
         get_last_two_cycles_moving_stdev(master_tt_dic, mouse, n_stdev)
         
@@ -487,29 +487,27 @@ def parse_list(any_list, sample_frequency):
     parsed_list = any_list[::sample_frequency]
     return parsed_list
 
-def plot_each_treatment_last_days(last_four_days_pre, last_four_days_post, times, veh_mice,
-                                  treatment_mice, sample_frequency, all_times_dic):
-    """Given lists of pre and post treatment days, a list of light cycles, lists of vehicle and
-    treatment mice, and all_time or master_tt dictionary, saves two plots. One of pre-treatment
+def plot_each_treatment_last_days(last_four_days_pre, last_four_days_post, times, tx2_mice,
+                                  tx1_mice, sample_frequency, all_times_dic):
+    """Given lists of pre and post treatment days, a list of light cycles, lists of treatment 1 and
+    treatment 2 mice, and all_time or master_tt dictionary, saves two plots. One of pre-treatment
     temperature averages every sample_frequency, and one of post-treatment temperature averages every
-    sample_frequency. Each plot has two lines-one of veh and treatment averages."""
-    pre_veh_lst =  make_organized_time_temp_list(last_four_days_pre, times, veh_mice, all_times_dic)
-    pre_treatment_lst =  make_organized_time_temp_list(last_four_days_pre, times,
-                                                       treatment_mice, all_times_dic)
-    post_veh_lst =  make_organized_time_temp_list(last_four_days_post, times, veh_mice, all_times_dic)
-    post_treatment_lst =  make_organized_time_temp_list(last_four_days_post, times,
-                                                        treatment_mice,all_times_dic)
+    sample_frequency. Each plot has two lines-one of treatment 1 and treatment 2 averages."""
+    pre_tx2_lst =  make_organized_time_temp_list(last_four_days_pre, times, tx2_mice, all_times_dic)
+    pre_tx1_lst =  make_organized_time_temp_list(last_four_days_pre, times,tx1_mice, all_times_dic)
+    post_tx2_lst =  make_organized_time_temp_list(last_four_days_post, times, tx2_mice, all_times_dic)
+    post_tx1_lst =  make_organized_time_temp_list(last_four_days_post, times, tx1_mice,all_times_dic)
     #necessary for controling axis
     fig = plt.figure()
     ax = fig.gca()
         
-    x_times = parse_list( make_last_days_x_list(pre_veh_lst), sample_frequency)
-    y_veh = parse_list( make_last_days_y_list(pre_veh_lst), sample_frequency)
-    y_treatment = parse_list( make_last_days_y_list(pre_treatment_lst), sample_frequency)
-    #blue is vehicle, red is treatment
+    x_times = parse_list( make_last_days_x_list(pre_tx2_lst), sample_frequency)
+    y_tx2 = parse_list( make_last_days_y_list(pre_tx2_lst), sample_frequency)
+    y_tx1 = parse_list( make_last_days_y_list(pre_tx1_lst), sample_frequency)
+    #blue is tx2, red is tx1
     plt.figure()
-    plt.plot(x_times, y_veh, 'b-', label='Vehicle')
-    plt.plot(x_times, y_treatment, 'r-', label='Acyline')
+    plt.plot(x_times, y_tx2, 'b-', label='Treatment 2')
+    plt.plot(x_times, y_tx1, 'r-', label='Treatment 1')
     plt.legend()
     plt.ylim(35, 38.5, .5)
     plt.xticks(np.arange(min(x_times), max(x_times)+120, 1440))
@@ -520,13 +518,13 @@ def plot_each_treatment_last_days(last_four_days_pre, last_four_days_post, times
     #plt.show()
 
     plt.figure()
-    x_times = parse_list( make_last_days_x_list(post_veh_lst), sample_frequency)
-    y_veh = parse_list( make_last_days_y_list(post_veh_lst), sample_frequency)
-    y_treatment = parse_list( make_last_days_y_list(post_treatment_lst), sample_frequency)
-    #blue is vehicle, red is treatment
+    x_times = parse_list( make_last_days_x_list(post_tx2_lst), sample_frequency)
+    y_tx2 = parse_list( make_last_days_y_list(post_tx2_lst), sample_frequency)
+    y_tx1 = parse_list( make_last_days_y_list(post_tx1_lst), sample_frequency)
+    #blue is tx2, red is tx1
     plt.figure()
-    plt.plot(x_times, y_veh, 'b-',label = 'Vehicle')
-    plt.plot(x_times, y_treatment, 'r-', label = 'Acyline')
+    plt.plot(x_times, y_tx2, 'b-',label = 'Treatment 2')
+    plt.plot(x_times, y_tx1, 'r-', label = 'Treatment 1')
     plt.legend()
     plt.xticks(np.arange(min(x_times), max(x_times)+120, 1440))
     plt.ylim(35, 38.5, 0.5)
@@ -555,29 +553,27 @@ def make_stdev_organized_time_temp_list(days, times, mouse_list, pre_time_temps_
     organized_tts_list = sorted(time_pt_tuples_list)
     return organized_tts_list
 
-def plot_stdev_each_treatment_last_days(last_four_days_pre, last_four_days_post, times, veh_mice,
-                                  treatment_mice, sample_frequency, all_times_dic):
-    """Given lists of pre and post treatment days, a list of light cycles, lists of vehicle and
-    treatment mice, and all_time or master_tt dictionary, saves two plots. One of pre-treatment
+def plot_stdev_each_treatment_last_days(last_four_days_pre, last_four_days_post, times, tx2_mice,
+                                  tx1_mice, sample_frequency, all_times_dic):
+    """Given lists of pre and post treatment days, a list of light cycles, lists of tx1 and
+    tx2 mice, and all_time or master_tt dictionary, saves two plots. One of pre-treatment
     temperature averages every sample_frequency, and one of post-treatment temperature averages every
-    sample_frequency. Each plot has two lines-one of veh and treatment averages."""
-    pre_veh_lst =  make_stdev_organized_time_temp_list(last_four_days_pre, times, veh_mice, all_times_dic)
-    pre_treatment_lst =  make_stdev_organized_time_temp_list(last_four_days_pre, times,
-                                                       treatment_mice, all_times_dic)
-    post_veh_lst =  make_stdev_organized_time_temp_list(last_four_days_post, times, veh_mice, all_times_dic)
-    post_treatment_lst =  make_stdev_organized_time_temp_list(last_four_days_post, times,
-                                                        treatment_mice,all_times_dic)
+    sample_frequency. Each plot has two lines-one of tx1 and tx2 averages."""
+    pre_tx2_lst =  make_stdev_organized_time_temp_list(last_four_days_pre, times, tx2_mice, all_times_dic)
+    pre_tx1_lst =  make_stdev_organized_time_temp_list(last_four_days_pre, times, tx1_mice, all_times_dic)
+    post_tx2_lst =  make_stdev_organized_time_temp_list(last_four_days_post, times, tx2_mice, all_times_dic)
+    post_tx1_lst =  make_stdev_organized_time_temp_list(last_four_days_post, times,tx1_mice,all_times_dic)
     #necessary for controling axis
     fig = plt.figure()
     ax = fig.gca()
         
-    x_times = parse_list( make_last_days_x_list(pre_veh_lst), sample_frequency)
-    y_veh = parse_list( make_last_days_y_list(pre_veh_lst), sample_frequency)
-    y_treatment = parse_list( make_last_days_y_list(pre_treatment_lst), sample_frequency)
-    #blue is vehicle, red is treatment
+    x_times = parse_list( make_last_days_x_list(pre_tx2_lst), sample_frequency)
+    y_tx2 = parse_list( make_last_days_y_list(pre_tx2_lst), sample_frequency)
+    y_tx1 = parse_list( make_last_days_y_list(pre_tx1_lst), sample_frequency)
+    #blue is tx2, red is tx1
     plt.figure()
-    plt.plot(x_times, y_veh, 'b-', label='Vehicle')
-    plt.plot(x_times, y_treatment, 'r-', label='Acyline')
+    plt.plot(x_times, y_tx2, 'b-', label='Treatment 2')
+    plt.plot(x_times, y_tx1, 'r-', label='Treatment 1')
     plt.legend()
     plt.ylim(0, 3, .25)
     plt.xticks(np.arange(min(x_times), max(x_times)+120, 1440))
@@ -588,13 +584,13 @@ def plot_stdev_each_treatment_last_days(last_four_days_pre, last_four_days_post,
     #plt.show()
 
     plt.figure()
-    x_times = parse_list( make_last_days_x_list(post_veh_lst), sample_frequency)
-    y_veh = parse_list( make_last_days_y_list(post_veh_lst), sample_frequency)
-    y_treatment = parse_list( make_last_days_y_list(post_treatment_lst), sample_frequency)
-    #blue is vehicle, red is treatment
+    x_times = parse_list( make_last_days_x_list(post_tx2_lst), sample_frequency)
+    y_tx2 = parse_list( make_last_days_y_list(post_tx2_lst), sample_frequency)
+    y_tx1 = parse_list( make_last_days_y_list(post_tx1_lst), sample_frequency)
+    #blue is tx2, red is tx1
     plt.figure()
-    plt.plot(x_times, y_veh, 'b-',label = 'Vehicle')
-    plt.plot(x_times, y_treatment, 'r-', label = 'Acyline')
+    plt.plot(x_times, y_tx2, 'b-',label = 'Treatment 2')
+    plt.plot(x_times, y_tx1, 'r-', label = 'Treatment 1')
     plt.legend()
     plt.xticks(np.arange(min(x_times), max(x_times)+120, 1440))
     plt.ylim(0, 3, 0.25)
@@ -619,20 +615,20 @@ def make_last_days_y_list(time_tuple_lst):
         temp_list.append(tpl[1])  #do not use "extend"...says "numpy.float64 object is not iterable" 
     return temp_list
 
-def overall_expt_plot(day_labels, times, veh_mice, treatment_mice, sample_frequency, all_times_dic):
-    """Given lists of all the days, all the times, all vehicle mice, all acyline mice, an integer of
+def overall_expt_plot(day_labels, times, tx2_mice, tx1_mice, sample_frequency, all_times_dic):
+    """Given lists of all the days, all the times, all tx1 mice, all tx2 mice, an integer of
     how often to plot the data points, and the all_times_dic, plots the average CBT of each
     treatment at each time point for the entire experiment."""
-    veh_lst =  make_organized_time_temp_list(day_labels, times, veh_mice, all_times_dic)
-    treatment_lst =  make_organized_time_temp_list(day_labels, times,treatment_mice,all_times_dic) 
+    tx2_lst =  make_organized_time_temp_list(day_labels, times, tx2_mice, all_times_dic)
+    tx1_lst =  make_organized_time_temp_list(day_labels, times,tx1_mice,all_times_dic) 
     plt.figure()
-    x_times = parse_list( make_last_days_x_list(veh_lst), sample_frequency)
-    y_veh = parse_list( make_last_days_y_list(veh_lst), sample_frequency)
-    y_treatment = parse_list( make_last_days_y_list(treatment_lst), sample_frequency)
-    #blue is vehicle, red is treatment
+    x_times = parse_list( make_last_days_x_list(tx2_lst), sample_frequency)
+    y_tx2 = parse_list( make_last_days_y_list(tx2_lst), sample_frequency)
+    y_tx1 = parse_list( make_last_days_y_list(tx1_lst), sample_frequency)
+    #blue is tx2, red is tx1
     plt.figure()
-    plt.plot(x_times, y_veh, 'b-',label = 'Vehicle')
-    plt.plot(x_times, y_treatment, 'r-', label = 'Acyline')
+    plt.plot(x_times, y_tx2, 'b-',label = 'Treatment 2')
+    plt.plot(x_times, y_tx1, 'r-', label = 'Treatment 1')
     plt.legend()
     plt.xticks(np.arange(min(x_times), max(x_times)+120, 2880), rotation=45)
     plt.ylim(35, 38.5, 0.5)
@@ -641,20 +637,20 @@ def overall_expt_plot(day_labels, times, veh_mice, treatment_mice, sample_freque
     plt.ylabel('Average CBT in deg C')
     plt.savefig('avg_temp_per_pt_entire_expt.png')
 
-def overall_expt_plot_stdev(day_labels, times, veh_mice, treatment_mice, sample_frequency, all_times_dic):
-    """Given lists of all the days, all the times, all vehicle mice, all acyline mice, an integer of
+def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_frequency, all_times_dic):
+    """Given lists of all the days, all the times, all treatment 2 mice, all treatment 1 mice, an integer of
     how often to plot the data points, and the all_times_dic, plots the stdev of the CBT of each
     treatment at each time point for the entire experiment."""
-    veh_lst =  make_stdev_organized_time_temp_list(day_labels, times, veh_mice, all_times_dic)
-    treatment_lst =  make_stdev_organized_time_temp_list(day_labels, times,treatment_mice,all_times_dic) 
+    tx2_lst =  make_stdev_organized_time_temp_list(day_labels, times, tx2_mice, all_times_dic)
+    tx1_lst =  make_stdev_organized_time_temp_list(day_labels, times,tx1_mice,all_times_dic) 
     plt.figure()
-    x_times = parse_list( make_last_days_x_list(veh_lst), sample_frequency)
-    y_veh = parse_list( make_last_days_y_list(veh_lst), sample_frequency)
-    y_treatment = parse_list( make_last_days_y_list(treatment_lst), sample_frequency)
-    #blue is vehicle, red is treatment
+    x_times = parse_list( make_last_days_x_list(tx2_lst), sample_frequency)
+    y_tx2 = parse_list( make_last_days_y_list(tx2_lst), sample_frequency)
+    y_tx1 = parse_list( make_last_days_y_list(tx1_lst), sample_frequency)
+    #blue is tx2, red is tx1
     plt.figure()
-    plt.plot(x_times, y_veh, 'b-',label = 'Vehicle')
-    plt.plot(x_times, y_treatment, 'r-', label = 'Acyline')
+    plt.plot(x_times, y_tx2, 'b-',label = 'Treatment 2')
+    plt.plot(x_times, y_tx1, 'r-', label = 'Treatment 1')
     plt.legend()
     plt.xticks(np.arange(min(x_times), max(x_times)+120, 2880), rotation=45)
     plt.ylim(0, 2.5, 0.25)
@@ -728,13 +724,14 @@ def main():
 
     treatments = ["Acyline", "Vehicle"]
 
-    acyline_mice = ['2', '4', '9', '11', '14', '17', '18']
-    veh_mice = ['3', '6', '7', '10', '12', '13', '16']
+    tx1_mice = ['2', '4', '9', '11', '14', '17', '18']
+    tx2_mice = ['3', '6', '7', '10', '12', '13', '16']
     all_mice = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
 
 
-    treatment_days = ['8-14-14', '8-15-14', '8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
-    veh_days = ['8-11-14 Light only','8-11-14','8-12-14','8-13-14']
+##    treatment_days = ['8-14-14', '8-15-14', '8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
+##    veh_days = ['8-11-14 Light only','8-11-14','8-12-14','8-13-14']
+#not used
 
     last_four_pre_days = ['8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14']
     #throw out dark cycle of 8-11 light only because it has no data
@@ -756,17 +753,17 @@ def main():
     
     plot_n_moving_stdv(day_labels, all_mice, times, master_tt_dic, n_stdev)
 
-    get_all_last_2_cycles_moving_stdev(master_tt_dic, acyline_mice, veh_mice, n_stdev)
+    get_all_last_2_cycles_moving_stdev(master_tt_dic, tx1_mice, tx2_mice, n_stdev)
     
     ##################################################################################################
     all_times_dic = make_all_times_dic(filenames, mouse_ids)
 
-    plot_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, veh_mice,
-                                 acyline_mice, 1, all_times_dic)
-    overall_expt_plot(day_labels, times, veh_mice, acyline_mice, 1, all_times_dic) 
-    plot_stdev_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, veh_mice,
-                                        acyline_mice, 1, all_times_dic)
-    overall_expt_plot_stdev(day_labels, times, veh_mice, acyline_mice, 1, all_times_dic)
+    plot_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, tx2_mice,
+                                 tx1_mice, 1, all_times_dic)
+    overall_expt_plot(day_labels, times, tx2_mice, tx1_mice, 1, all_times_dic) 
+    plot_stdev_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, tx2_mice,
+                                        tx1_mice, 1, all_times_dic)
+    overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, 1, all_times_dic)
     #Make sample frequency a variable
     #Make another function that does moving avg/stdev
     
