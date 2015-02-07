@@ -217,7 +217,7 @@ def find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic): #Ultimately
 
 def n_pt_mavg(CBT_list, n_ints_in_mavg):
     """Given a list of CBTs (floats) and an integer, returns a new list of averaged pts (n point
-    moving averages). First and last ten points simply have fewer points averaged.
+    moving averages). First and last edge points simply have fewer points averaged.
     NOTE- even numbered n_ints_in_mavg will take (n_ints_in_mavg/2) pts before and after the
     selected point."""
     left_norm = n_ints_in_mavg/2 + 1

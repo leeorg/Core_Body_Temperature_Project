@@ -4,7 +4,33 @@
 \margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
-\f0\fs24 \cf0 First five rows of user_modify.csv allow user to enter mice ids into the treatment group they belong. If there are no mice in a given treatment group, DO NOT enter anything in that row. Delete the example mouse numbers and leave those cells blank.\
+\f0\fs24 \cf0 Treatment n\
+All rows that have the word \'93treatment\'94 allow user to enter mice numbers to the right (starting in column B, and entering one mouse number per cell). If there are no mice in a given treatment group, DO NOT enter anything in that row. Delete the example mouse numbers and leave those cells blank if there are no mice in a 3rd, 4th, etc. treatment group. You can add more treatment groups, just make sure that the word \'93treatment\'94 is in column A. You can delete empty treatment group rows if you wish.\
 \
-For n_moving_stdev and n_pt_mavg, the number you input determines your moving average/moving standard deviation. Your number MUST be greater than one or the program will stop. If you enter an even number, the program will take (your number divided by 2) before the point it\'92s analyzing, and (your number divided by 2) after the point it\'92s analyzing as well as the point it\'92s analyzing. If you choose an odd number, 9 for example, it will take 4 before and 4 after the point in question while including the point in question.\
-###Include ability for multiply n\'92s so we don\'92t have to run the program a bunch of times?###}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 moving average number of points\
+The mean is calculated with a tool called np.mean (it simply calculates the mean of the numbers it is given).\
+Do not alter the cell labeled \'93moving average number of points\'94. The code relies on those exact words with that exact same capitalization, etc. The line that it\'92s on does not matter though. \
+To the right of this cell, type the number of points you wish to be analyzed when calculating a moving average. \
+The number must be greater than 0 or the program will not work. \
+You must enter a number for the program to work.\
+If you enter 1, it will not calculate a moving average, but will still generate plots and such. \
+If you enter an even number, 4 for example, it will take two points before the point in question, two points after the point in question, and the point in question itself. \
+If you enter an odd number, 5 for example, it will take two points before the point in question, two points after the point in question, and the point in question itself. \
+Numbers at the edges of data being analyzed will simply have fewer points in the calculated moving average.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
+\cf0 moving standard deviation number of points\
+The standard deviation is calculated with scipy.stats.tstd, which calculates the sample standard deviation of the numbers it is given.\
+Do not alter the cell labeled \'93moving standard deviation number of points\'94. The code relies on those exact words with that exact same capitalization, etc. The line that it\'92s on does not matter though. \
+To the right of this cell, type the number of points you wish to be analyzed when calculating a standard deviation. \
+The number must be greater than 1 or the program will not work.\
+You must enter a number for the program to work.\
+If you enter an even number, 4 for example, it will take two points before the point in question, two points after the point in question, and the point in question itself. \
+If you enter an odd number, 5 for example, it will take two points before the point in question, two points after the point in question, and the point in question itself.\
+Numbers at the edges of data being analyzed will simply have fewer points in the calculated standard deviation. \
+\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
+\cf0 ###Include ability for multiple moving n\'92s so we don\'92t have to run the program a bunch of times?###}
