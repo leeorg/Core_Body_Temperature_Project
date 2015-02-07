@@ -4,7 +4,7 @@
 # Steiner Lab
 #
 #
-# 1-29-14
+
 
 ##import cProfile, pstats, StringIO
 ##pr = cProfile.Profile()
@@ -57,6 +57,22 @@ def extract(filename, data_dict, mouse_ids):
                         pt = (row['2 Acyline Deg. C Time'] , float(row[mouse]) ) #makes (time, temp)
                         data_dict[mouse].append((pt))
     return data_dict
+
+def extract_ints_in_mavg(filename):
+    """Given a .csv file where the first cell in one of the rows contains the phrase
+    'moving average number of points', returns the integer in the cell to the right."""
+    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+    for line in data:
+        if 'moving average number of points' in line:
+            return int(line[1])
+
+def extract_ints_in_moving_stdev(filename):
+    """Given a .csv file where the first cell in one of the rows contains the phrase
+    'moving standard deviation number of points', returns the integer in the cell to the right."""
+    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+    for line in data:
+        if 'moving standard deviation number of points' in line:
+            return int(line[1])
 
 def separate_light_dark(data_dict, mouse):
     """Given data_dict and a given mouse, will return a dictionary of two lists of (time, temp)
@@ -727,18 +743,22 @@ def main():
     last_four_post_days = ['8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
     #throw out light cycle of 8-20 because it's not a full cycle
 
-    n_ints_in_mavg = 21
-    n_stdev = 21
+    n_ints_in_mavg = extract_ints_in_mavg('user_modify.csv')
+    #this defines how many points to be used in calculating moving averages
+    
+    n_stdev = extract_ints_in_moving_stdev('user_modify.csv')
+    #this defines how many points to be used in calculating moving standard deviation
 
     master_tt_dic = make_master_tt_dic(filenames, mouse_ids)
-    #find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic) #modify to make excel doc, NOT print
+    find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic) #modify to make excel doc, NOT print
     mav_master_dic = make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic, n_ints_in_mavg)
     all_avg_plots(master_tt_dic)
     
     plot_n_moving_stdv(day_labels, all_mice, times, master_tt_dic, n_stdev)
 
     get_all_last_2_cycles_moving_stdev(master_tt_dic, acyline_mice, veh_mice, n_stdev)
-#####################################################################################################
+    
+    ##################################################################################################
     all_times_dic = make_all_times_dic(filenames, mouse_ids)
 
     plot_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, veh_mice,
