@@ -25,6 +25,7 @@ import scipy
 from scipy import stats
 import collections
 
+
 def get_data_file_names(): ##expand for .txt files later
     """Returns list of strings of .csv data files in the directory the code is being run in that
     don't have "user" or "test" in their title."""
@@ -713,23 +714,10 @@ def main():
                  "20 Acyline Deg. C Data",]
     
 ##    mouse_ids = #get_all_mouse ids ##MAKE THIS FUNCTION##
-
     mouse_nums = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
 
     # each file for the Acyline project (except the first) starts at 18:00:00 on the day of the
-    # file label, then goes until 17:59:59 the next day
-##    filenames = ["8-11-14 Light only, Light Cycle.csv",
-##                 "8-11-14, Dark Cycle.csv",
-##                 "8-12-14, Dark Cycle.csv",
-##                 "8-13-14, Dark Cycle.csv",
-##                 "8-14-14, Dark Cycle.csv",
-##                 "8-15-14, Dark Cycle.csv",
-##                 "8-16-14, Dark Cycle.csv",
-##                 "8-17-14, Dark Cycle.csv",
-##                 "8-18-14, Dark Cycle.csv",
-##                 "8-19-14, Dark Cycle.csv",
-##                 "8-20-14, Dark Cycle.csv",]
-
+    # just gets .csv files without the words 'test' or 'user' in the file name
     filenames = get_data_file_names()
    
     day_labels = [ '8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14', '8-15-14',
@@ -737,16 +725,10 @@ def main():
 
     times = ["Dark Cycle", "Light Cycle"]
 
-    treatments = ["Acyline", "Vehicle"]
-
     tx1_mice = ['2', '4', '9', '11', '14', '17', '18']
     tx2_mice = ['3', '6', '7', '10', '12', '13', '16']
     all_mice = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
 
-
-##    treatment_days = ['8-14-14', '8-15-14', '8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
-##    veh_days = ['8-11-14 Light only','8-11-14','8-12-14','8-13-14']
-#not used
 
     last_four_pre_days = ['8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14']
     #throw out dark cycle of 8-11 light only because it has no data
