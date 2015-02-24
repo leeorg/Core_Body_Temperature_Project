@@ -45,6 +45,28 @@ def get_data_file_names():
             data_files.append(f)
     return data_files
 
+def get_all_mouse_ids_csv(filenames): ##Change this for raw csv!This is temporary!!!
+    """Looks at all .csv data files and extracts the mouse ids from them"""
+    mouse_ids = set()
+    for title in filenames:
+        match = re.search(r'-\d+.+csv\Z', title)
+        # \d is any number 0-9
+        #+ means 1 or more of the preceding character
+        # . means any character other than new line
+        # \Z means at the end of the line
+        if match:
+            data = csv.reader(open(title, 'rU'), quotechar='"', delimiter = ',')
+            for line in data:
+                for string in line:
+                    m = re.search('[0-9]{1} [a-zA-Z]+ Deg. C Data', string)
+                    found ="" 
+                    if m:
+                        found = m.group()
+                        mouse_ids.add(string)
+                else: pass
+    #doesn't truly sort, puts '10 nnn' before '2 nnn' for example, but doesn't need to be sorted
+    return sorted(mouse_ids)       
+
 
 def day_label(day):
     """Given a string that is the filename, isolates the date and returns date in string format"""
@@ -94,14 +116,23 @@ def extract_ints_in_moving_stdev(filename):
         if 'moving standard deviation number of points' in line:
             return int(line[1])
 
-##def extract_mouse_nums_to_use(filename):
-##    """Given a .csv file where the first cell in at least one of the rows contains the phrase
-##    'Treatment ' (NOTE the space after the word 'Treatment'), returns a sorted list of all mouse
-##    numbers given in those rows."""
-##    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
-##    for line in data:
-##        if 'Treatment ' in line:
-##            print line
+def extract_mouse_nums_to_use(filename):
+    """Given a .csv file where the first cell in at least one of the rows contains the phrase
+    'Treatment ' (NOTE the space after the word 'Treatment'), returns a sorted list of strings of
+    all mouse numbers given in those rows. Assumes mouse numbers have no other characters."""
+    mouse_nums = []
+    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+    for line in data:
+        if 'Treatment ' in line[0]:
+            for string in line:
+                match = re.search('^\d+', string)
+                #matches strings that begin with a digit
+                found =""
+                if match:
+                    found = match.group()
+                    mouse_nums.append(string)
+    #sorts mouse nums (assumes mouse num is ONLY digits)
+    return sorted(mouse_nums, key=lambda x:float(x))
 
 def separate_light_dark(data_dict, mouse):
     """Given data_dict and a given mouse, will return a dictionary of two lists of (time, temp)
@@ -688,27 +719,6 @@ def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_freque
     plt.ylabel('Stdev CBT in deg C')
     plt.savefig('stdev_temp_per_pt_entire_expt.png')
     
-def get_all_mouse_ids_csv(filenames): ##Change this for raw csv!This is temporary!!!
-    """Looks at all .csv data files and extracts the mouse ids from them"""
-    mouse_ids = set()
-    for title in filenames:
-        match = re.search(r'-\d+.+csv\Z', title)
-        # \d is any number 0-9
-        #+ means 1 or more of the preceding character
-        # . means any character other than new line
-        # \Z means at the end of the line
-        if match:
-            data = csv.reader(open(title, 'rU'), quotechar='"', delimiter = ',')
-            for line in data:
-                for string in line:
-                    m = re.search('[0-9]{1} [a-zA-Z]+ Deg. C Data', string)
-                    found ="" 
-                    if m:
-                        found = m.group()
-                        mouse_ids.add(string)
-                else: pass
-    #doesn't truly sort, puts '10 nnn' before '2 nnn' for example, but doesn't need to be sorted
-    return sorted(mouse_ids)       
         
 
 #################
@@ -717,13 +727,15 @@ def get_all_mouse_ids_csv(filenames): ##Change this for raw csv!This is temporar
     
 def main():
     """This is the main python code that is run in this program."""
+    user_input = 'user_modify.csv'
     
     # just gets .csv files without the words 'test' or 'user' in the file name
     filenames = get_data_file_names()
     
     mouse_ids = get_all_mouse_ids_csv(filenames)
 
-    mouse_nums = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
+    mouse_nums = extract_mouse_nums_to_use(user_input)
+
 
     # each file for the Acyline project (except the first) starts at 18:00:00 on the day of the
     
@@ -745,10 +757,10 @@ def main():
     last_four_post_days = ['8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
     #throw out light cycle of 8-20 because it's not a full cycle
 
-    n_ints_in_mavg = extract_ints_in_mavg('user_modify.csv')
+    n_ints_in_mavg = extract_ints_in_mavg(user_input)
     #this defines how many points to be used in calculating moving averages
     
-    n_stdev = extract_ints_in_moving_stdev('user_modify.csv')
+    n_stdev = extract_ints_in_moving_stdev(user_input)
     #this defines how many points to be used in calculating moving standard deviation
 
     master_tt_dic = make_master_tt_dic(filenames, mouse_ids)
