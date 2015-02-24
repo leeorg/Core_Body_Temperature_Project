@@ -17,6 +17,7 @@
 
 import os
 import csv
+import re
 import numpy as np
 import matplotlib.pyplot as plt
 import math
@@ -25,10 +26,10 @@ import scipy
 from scipy import stats
 import collections
 
-
-def get_data_file_names(): ##expand for .txt files later
-    """Returns list of strings of .csv data files in the directory the code is being run in that
-    don't have "user" or "test" in their title."""
+def get_data_file_names(): 
+    """Returns list of strings of .csv/.TXT data files in the directory the code is being run in that
+    don't have "user" or "test" in their title but do have '.csv', 'CBT ' (NOTE space after 'CBT'!!)
+    or 'Proper' in their title."""
     data_files = []
     files = [f for f in os.listdir('.') if os.path.isfile(f)]
     for f in files:
@@ -38,7 +39,12 @@ def get_data_file_names(): ##expand for .txt files later
             pass
         elif '.csv' in f:
             data_files.append(f)
+        elif 'Proper' in f:
+            data_files.append(f)
+        elif 'CBT ' in f:###This seems to change, make variable that user changes in user_modify?
+            data_files.append(f)
     return data_files
+
 
 def day_label(day):
     """Given a string that is the filename, isolates the date and returns date in string format"""
@@ -87,6 +93,15 @@ def extract_ints_in_moving_stdev(filename):
     for line in data:
         if 'moving standard deviation number of points' in line:
             return int(line[1])
+
+##def extract_mouse_nums_to_use(filename):
+##    """Given a .csv file where the first cell in at least one of the rows contains the phrase
+##    'Treatment ' (NOTE the space after the word 'Treatment'), returns a sorted list of all mouse
+##    numbers given in those rows."""
+##    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+##    for line in data:
+##        if 'Treatment ' in line:
+##            print line
 
 def separate_light_dark(data_dict, mouse):
     """Given data_dict and a given mouse, will return a dictionary of two lists of (time, temp)
@@ -673,10 +688,42 @@ def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_freque
     plt.ylabel('Stdev CBT in deg C')
     plt.savefig('stdev_temp_per_pt_entire_expt.png')
 
-##def get_all_mouse_ids():
-##    """Looks at all .csv data files and extracts the mouse ids from them"""
-##    ###ADD THIS FUNCTION###
-##
+##def get_all_mouse_ids_csv():
+##    """Looks at all .csv data files and returns a list of extracted mouse ids"""
+##    for title in filenames:
+##        match = re.search(r'd\d\-\d\d\-\d\d\d\d', title)
+##        # \d is any number 0-9
+##        if match:
+##            data = csv.reader(open(title, 'rU'), quotechar='"', delimiter = ',')
+##            for line in data:
+##                match = re.search(r'd+\s\Veh Deg. C Data\,\d+\s\Veh Deg. C Data', line)
+##                if match:
+##                    print line
+    
+def get_all_mouse_ids_csv(filenames): 
+    """Looks at all .csv data files and extracts the mouse ids from them"""
+    mouse_ids = set()
+    for title in filenames:
+        match = re.search(r'-\d+.+csv\Z', title)
+        # \d is any number 0-9
+        #+ means 1 or more of the preceding character
+        # . means any character other than new line
+        # \Z means at the end of the line
+        if match:
+            data = csv.reader(open(title, 'rU'), quotechar='"', delimiter = ',')
+            #count = 0
+            for line in data:
+                #count+=1
+                for string in line:
+                    m = re.search('[0-9]{1} [a-zA-Z]+ Deg. C Data', string)
+                    found ="" 
+                    if m:
+                        found = m.group()
+                        mouse_ids.add(string)
+                else: pass
+    return sorted(mouse_ids) #doesn't truly sort, puts '10 nnn' before '2 nnn' for example          
+        
+
 ##def extract_mouse_ids(filename):
 ##    """Given a string that is a name of a data file, extracts the mouse ids from the first row of
 ##    the document (by making sure they have the word "Data" in the cell). Returns a list of each
@@ -701,6 +748,10 @@ def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_freque
 def main():
     """This is the main python code that is run in this program."""
     
+    # just gets .csv files without the words 'test' or 'user' in the file name
+    filenames = get_data_file_names()
+    
+    mouse_ids = get_all_mouse_ids_csv(filenames)
     mouse_ids = ["2 Veh Deg. C Data","2 Acyline Deg. C Data","3 Veh Deg. C Data","3 Acyline Deg. C Data",
                  "4 Veh Deg. C Data","4 Acyline Deg. C Data","6 Veh Deg. C Data", "6 Acyline Deg. C Data",
                  "7 Veh Deg. C Data","7 Acyline Deg. C Data","8 Veh Deg. C Data","8 Acyline Deg. C Data",
@@ -717,8 +768,7 @@ def main():
     mouse_nums = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
 
     # each file for the Acyline project (except the first) starts at 18:00:00 on the day of the
-    # just gets .csv files without the words 'test' or 'user' in the file name
-    filenames = get_data_file_names()
+    
    
     day_labels = [ '8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14', '8-15-14',
                    '8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
