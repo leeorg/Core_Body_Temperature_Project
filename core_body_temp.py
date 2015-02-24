@@ -729,13 +729,15 @@ def main():
     """This is the main python code that is run in this program."""
     user_input = 'user_modify.csv'
     
-    # just gets .csv files without the words 'test' or 'user' in the file name
     filenames = get_data_file_names()
+    # just gets .csv files without the words 'test' or 'user' in the file name
     
     mouse_ids = get_all_mouse_ids_csv(filenames)
+    #mouse ids is a list of strings from the csv files with data
 
     mouse_nums = extract_mouse_nums_to_use(user_input)
-
+    #mouse_nums is a sorted list of strings of all mouse numbers to be used in analysis
+    #as dictated by user
 
     # each file for the Acyline project (except the first) starts at 18:00:00 on the day of the
     
@@ -747,7 +749,6 @@ def main():
 
     tx1_mice = ['2', '4', '9', '11', '14', '17', '18']
     tx2_mice = ['3', '6', '7', '10', '12', '13', '16']
-    all_mice = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
 
 
     last_four_pre_days = ['8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14']
@@ -768,7 +769,7 @@ def main():
     mav_master_dic = make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic, n_ints_in_mavg)
     all_avg_plots(master_tt_dic)
     
-    plot_n_moving_stdv(day_labels, all_mice, times, master_tt_dic, n_stdev)
+    plot_n_moving_stdv(day_labels, mouse_nums, times, master_tt_dic, n_stdev)
 
     get_all_last_2_cycles_moving_stdev(master_tt_dic, tx1_mice, tx2_mice, n_stdev)
     
