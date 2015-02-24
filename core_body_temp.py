@@ -247,34 +247,6 @@ def find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic): #Ultimately
                 else:
                     print "There is no data for this cycle"
 
-##def mav(CBT_list):
-##    """Given a list of CBTs, returns a new list of averaged points (9 point moving averages). First
-##    and last four points simply have fewer points averaged."""
-##    count = 0
-##    new = []
-##    for temp in CBT_list:
-##        count += 1
-##        if count == 1:
-##            new.append(np.mean(CBT_list[count-1:count+4]))
-##        elif count == 2:
-##            new.append(np.mean(CBT_list[count-2:count+4]))
-##        elif count == 3:
-##            new.append(np.mean(CBT_list[count-3:count+4]))
-##        elif count == 4:
-##            new.append(np.mean(CBT_list[count-4:count+4]))
-##            
-##        elif count == len(CBT_list):
-##            new.append(np.mean(CBT_list[count-5:count]))
-##        elif count == len(CBT_list) - 1:
-##            new.append(np.mean(CBT_list[count-5:count+1]))
-##        elif count == len(CBT_list) - 2:
-##            new.append(np.mean(CBT_list[count-5:count+2]))
-##        elif count == len(CBT_list) - 3:
-##            new.append(np.mean(CBT_list[count-5:count+3]))
-##        else:
-##            new.append(np.mean(CBT_list[count-5:count+4]))
-##    return new
-
 def n_pt_mavg(CBT_list, n_ints_in_mavg):
     """Given a list of CBTs (floats) and an integer, returns a new list of averaged pts (n point
     moving averages). First and last edge points simply have fewer points averaged.
