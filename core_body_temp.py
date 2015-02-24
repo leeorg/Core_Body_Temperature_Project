@@ -687,20 +687,8 @@ def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_freque
     plt.xlabel('Time (every 2880 is 24 hrs)')
     plt.ylabel('Stdev CBT in deg C')
     plt.savefig('stdev_temp_per_pt_entire_expt.png')
-
-##def get_all_mouse_ids_csv():
-##    """Looks at all .csv data files and returns a list of extracted mouse ids"""
-##    for title in filenames:
-##        match = re.search(r'd\d\-\d\d\-\d\d\d\d', title)
-##        # \d is any number 0-9
-##        if match:
-##            data = csv.reader(open(title, 'rU'), quotechar='"', delimiter = ',')
-##            for line in data:
-##                match = re.search(r'd+\s\Veh Deg. C Data\,\d+\s\Veh Deg. C Data', line)
-##                if match:
-##                    print line
     
-def get_all_mouse_ids_csv(filenames): 
+def get_all_mouse_ids_csv(filenames): ##Change this for raw csv!This is temporary!!!
     """Looks at all .csv data files and extracts the mouse ids from them"""
     mouse_ids = set()
     for title in filenames:
@@ -711,9 +699,7 @@ def get_all_mouse_ids_csv(filenames):
         # \Z means at the end of the line
         if match:
             data = csv.reader(open(title, 'rU'), quotechar='"', delimiter = ',')
-            #count = 0
             for line in data:
-                #count+=1
                 for string in line:
                     m = re.search('[0-9]{1} [a-zA-Z]+ Deg. C Data', string)
                     found ="" 
@@ -721,26 +707,10 @@ def get_all_mouse_ids_csv(filenames):
                         found = m.group()
                         mouse_ids.add(string)
                 else: pass
-    return sorted(mouse_ids) #doesn't truly sort, puts '10 nnn' before '2 nnn' for example          
+    #doesn't truly sort, puts '10 nnn' before '2 nnn' for example, but doesn't need to be sorted
+    return sorted(mouse_ids)       
         
 
-##def extract_mouse_ids(filename):
-##    """Given a string that is a name of a data file, extracts the mouse ids from the first row of
-##    the document (by making sure they have the word "Data" in the cell). Returns a list of each
-##    unique mouse id as it appears in the file."""
-##    mouse_id_set = set()
-##    data = csv.DictReader(open(filename, 'rU'), quotechar='"', delimiter = ',')
-##    count = 0
-##    for row in data:
-##        count += 1
-##        if count > 1:
-##            break
-##        print "row:", row
-##        for key in row:
-##            if 'Data' in key:
-##                mouse_id_set.add(key)
-##    return sorted(mouse_id_set)    
-    
 #################
 #### MAIN
 #################
@@ -752,19 +722,7 @@ def main():
     filenames = get_data_file_names()
     
     mouse_ids = get_all_mouse_ids_csv(filenames)
-    mouse_ids = ["2 Veh Deg. C Data","2 Acyline Deg. C Data","3 Veh Deg. C Data","3 Acyline Deg. C Data",
-                 "4 Veh Deg. C Data","4 Acyline Deg. C Data","6 Veh Deg. C Data", "6 Acyline Deg. C Data",
-                 "7 Veh Deg. C Data","7 Acyline Deg. C Data","8 Veh Deg. C Data","8 Acyline Deg. C Data",
-                 "9 Veh Deg. C Data","9 Acyline Deg. C Data","10 Veh Deg. C Data",
-                 "10 Acyline Deg. C Data","11 Veh Deg. C Data","11 Acyline Deg. C Data",
-                 "12 Veh Deg. C Data","12 Acyline Deg. C Data","13 Veh Deg. C Data",
-                 "13 Acyline Deg. C Data","14 Veh Deg. C Data","14 Acyline Deg. C Data",
-                 "16 Veh Deg. C Data","16 Acyline Deg. C Data","17 Veh Deg. C Data",
-                 "17 Acyline Deg. C Data", "18 Veh Deg. C Data", "18 Acyline Deg. C Data",
-                 "19 Veh Deg. C Data","19 Acyline Deg. C Data","20 Veh Deg. C Data",
-                 "20 Acyline Deg. C Data",]
-    
-##    mouse_ids = #get_all_mouse ids ##MAKE THIS FUNCTION##
+
     mouse_nums = ['2', '3', '4', '6', '7', '9', '10', '11', '12', '13', '14', '16', '17', '18']
 
     # each file for the Acyline project (except the first) starts at 18:00:00 on the day of the
