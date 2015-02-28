@@ -464,25 +464,13 @@ def refit_to_master_tt_dic(calibrated_tt_dic, mouse_ids, user_input):
         if day == all_days_l_edge[-1]:
             pass
             ##does not include last day because if there is no dark cycle, there is nothing stored
-            ##under that last day
+            ##under that last day, thus code assumes no dark cycle for last day
         else:
             master_tt_dic[day] = {}
             for mouse in mouse_ids:
                 master_tt_dic[day][mouse]={}
                 master_tt_dic[day][mouse]['Dark Cycle'] = [] 
-                master_tt_dic[day][mouse]['Light Cycle'] = []
-##    for day in all_days_l_edge:
-##        master_tt_dic[day] = {}
-##        for mouse in mouse_ids:
-##            master_tt_dic[day][mouse]={}
-##            master_tt_dic[day][mouse]['Dark Cycle'] = [] 
-##            master_tt_dic[day][mouse]['Light Cycle'] = []
-##                       
-##            for mouse in mouse_ids:
-##                master_tt_dic[day][mouse]={}
-##                master_tt_dic[day][mouse]['Dark Cycle'] = [] 
-##                master_tt_dic[day][mouse]['Light Cycle'] = []
-                
+                master_tt_dic[day][mouse]['Light Cycle'] = []                
     #sort into correct bins        
     count=0
     for day in all_days:
@@ -507,10 +495,10 @@ def list_CBT(day, mouse, cycle, master_tt_dic):
     return CBT_list
 
 def list_times(day, mouse, cycle, master_tt_dic):
-    """Returns a list of times (sec / 3600.0) for the given day, mouse, and light cycle"""
+    """Returns a list of times in seconds) for the given day, mouse, and light cycle"""
     time_list = []
     for time_temp_tuple in master_tt_dic[day][mouse][cycle]:
-        time_list.append(hms_to_secs(time_temp_tuple[0]) / 3600.0)
+        time_list.append(hms_to_secs(time_temp_tuple[0]) / 3600.0) #3600.0 is secs/hr
     return time_list
 
 def stder(CBT_list):
@@ -582,6 +570,10 @@ def n_moving_stdev(CBT_list, n_stdev):
     return new_list
 
 def plot_n_moving_stdv(day_list, mouse_list, cycle_list, master_tt_dic, n_stdev):
+    """Given a list of days (strings), mouse numbers (strings), cycles (strings), the master_tt_dic,
+    and the number of points to be used in calculating the standard deviation, saves a plot
+    of time of day vs.standard deviation of range given to analyze around that time. Saves one plot
+    per day per mouse."""
     for day in day_list:
         for mouse in mouse_list:
             CBT_list = []
@@ -686,7 +678,7 @@ def x_times(daily_avgs, day): #####combine this function with get_x_axis?
     """Returns list of times"""
     x_data = []
     for time in daily_avgs[day]:
-        x_data.append(hms_to_secs(time) / 3600.0)
+        x_data.append(hms_to_secs(time) / 3600.0) #3600.0 is secs/hr
     return x_data
 
 def y_avgs(daily_avgs, day):  #####combine this function with get_x_axis?
