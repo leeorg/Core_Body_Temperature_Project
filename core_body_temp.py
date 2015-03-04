@@ -65,14 +65,23 @@ def get_all_mouse_ids_csv(filenames): ##Change this for raw csv!This is temporar
                         mouse_ids.add(string)
                 else: pass
     #doesn't truly sort, puts '10 nnn' before '2 nnn' for example, but doesn't need to be sorted
-    return sorted(mouse_ids)       
-
+    return sorted(mouse_ids)
 
 def day_label(day):
     """Given a string that is the filename, isolates the date and returns date in string format"""
     split_file_name = [x.strip() for x in day.split(',')]
     file_date = split_file_name[0]
     return file_date
+
+def sort_day_labels(unsorted_day_labels):
+    """Given a list of strings that are day labels (where the first date also has an entry
+    that looks like, 'first_day Light Only'), switches the 1st and 2nd item once sorted(). This
+    function is needed because sorted() sorts 'Light Only' day as 2nd item, not 1st."""
+    first_sort = sorted(unsorted_day_labels)
+    template = list(first_sort) #saves a copy of first_sort that is subsequently not modified
+    first_sort.remove(first_sort[0]) #removes first full day from its 1st position
+    first_sort.insert(1, template[0]) #inserts first full day into 2nd position; Light Only is 1st
+    return first_sort
 
 def mouse_label(mouse):
     """Given a string that is the mouse ID in the csv file, isolates the mouse number while
@@ -99,6 +108,16 @@ def extract(filename, data_dict, mouse_ids):
                         pt = (row['2 Acyline Deg. C Time'] , float(row[mouse]) ) #makes (time, temp)
                         data_dict[mouse].append((pt))
     return data_dict
+
+##def extract_treatment_start_date(filename):
+##    """Given a .csv file where the first cell in one of the rows contains the phrase
+##    'treatment started', returns the integer in the cell to the right."""
+##    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+##    for line in data:
+##        if 'treatment started' in line:
+##            given_start_day = line[1]
+##            tt_dic_start_day = 
+
 
 def extract_ints_in_mavg(filename):
     """Given a .csv file where the first cell in one of the rows contains the phrase
@@ -980,8 +999,7 @@ def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_freque
     plt.ylabel('Stdev CBT in deg C')
     plt.savefig('stdev_temp_per_pt_entire_expt.png')
     
-        
-
+    
 #################
 #### MAIN
 #################
@@ -1022,7 +1040,8 @@ def main():
         raw_master_tt_dic = make_raw_master_tt_dic_txt(filenames, user_input)
         calibrated_tt_dict = calibrate_data(filenames, raw_master_tt_dic)
         master_tt_dic = refit_to_master_tt_dic(calibrated_tt_dict, mouse_ids, user_input)
-        day_labels = sorted(master_tt_dic.keys()) ##change to properly order
+        day_labels = sort_day_labels(master_tt_dic.keys()) ##change to properly order
+        print day_labels
         
         ##NOTE that function to create last_four_days has not been created yet, so not plotted
         
