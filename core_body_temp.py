@@ -284,17 +284,6 @@ def extract_light_cycle_times(filename):
             raw_cycle_bounds['Light Cycle'] = [line[1], line[2]]
         elif 'Dark Cycle' in line:
             raw_cycle_bounds['Dark Cycle'] = [line[1], line[2]]
-
-##    cycle_bounds = defaultdict(list())
-##    for cycle in raw_cycle_bounds:
-##        for time in raw_cycle_bounds[cycle]:
-##            reformatting_time = time.split(":")
-##            if len(reformatting_time[0]) < 2:
-##                reformatting_time[0] = '0'+reformatting_time[0]
-##            usable_time = str(reformatting_time[0]+':'+reformatting_time[1])
-##            cycle_bounds[cycle].append(usable_time)
-##    print cycle_bounds
-            
     return raw_cycle_bounds
 
 def extract_txt_mouse_ids(filenames):
@@ -311,8 +300,6 @@ def extract_txt_mouse_ids(filenames):
                     mouse_ids.append(mouse_id[1])  ##NOT flexible, this is temporary work around
                 else:
                     mouse_ids.append(mouse_id)
-##                split_mouse_id = data_file.split(' ')
-##                mouse_ids.append(split_mouse_id[3][0:2])
     return mouse_ids
 
 def extract_one_txt_mouse_id(filename):
@@ -329,8 +316,6 @@ def extract_raw_data_txt(files):
     for data_file in files:
         if 'CBT ' in data_file:
             mouse_id = extract_one_txt_mouse_id(data_file)
-##            split_mouse_id = data_file.split(' ')
-##            mouse_id = split_mouse_id[3][0:2]
             opened_file = open(data_file, 'r')        
             data = opened_file.readlines()
             one_mouse_dict = {}
@@ -341,7 +326,11 @@ def extract_raw_data_txt(files):
                 # \d is any number 0-9
                 if match:
                     splt_ln = line.split(' ')
-                    date = str(line.split(' ')[1])
+                    raw_date = str(line.split(' ')[1])
+                    date_pieces = raw_date.split('/')
+                    date = date_pieces[0]+'-'+date_pieces[1]+'-'+date_pieces[2]
+                    #date reformatting needed to prevent errors in plotting code interpreting
+                    # / as making new directory
                     time = splt_ln[3]+':00' #needed because original code needs seconds
                     temp = float(splt_ln[4][0:4])
                     tt_tuple = (time, temp ) #time, float(temp)
@@ -439,19 +428,6 @@ def separate_light_dark_txt(data_dict, mouse, user_input):
     light_data = []
     dark_data = []
     cycle_bounds = get_cycle_bounds_txt(user_input)
-##    raw_cycle_bounds = extract_light_cycle_times(user_input)
-##    #the following code must be in this function because it ensures time format unique to .txt files
-##    # nn:nn:nn or n:nn:nn or n:nn etc. --> nn:nn
-##    cycle_bounds = cycle_bounds_txt(raw_cycle_bounds)
-##    for cycle in raw_cycle_bounds:
-##        for time in raw_cycle_bounds[cycle]:
-##            reformatting_time = time.split(":")
-##            if len(reformatting_time[0]) < 2:
-##                reformatting_time[0] = '0'+reformatting_time[0]
-##                #concatination needed, or .csv reads '6:00' while .txt reads '06:00'...MUST be same
-##            usable_time = str(reformatting_time[0]+':'+reformatting_time[1])
-##            cycle_bounds.setdefault(cycle, []).append(usable_time)
-    
     earliest_light = cycle_bounds['Light Cycle'][0]
     latest_light = cycle_bounds['Light Cycle'][1]
 
@@ -1122,45 +1098,36 @@ def main():
         #mouse ids is a list of strings from the csv files with data
         day_labels = [ '8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14', '8-15-14',
                        '8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
-        
-##        last_four_pre_days = ['8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14']
-##        #throw out dark cycle of 8-11 light only because it has no data
-##        #throw out light cycle of 8-14 file because this is first round of treatment
-##        
-##        last_four_post_days = ['8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
-##        #throw out light cycle of 8-20 because it's not a full cycle
+
         master_tt_dic = make_master_tt_dic(filenames, mouse_ids)
     
     ########
     ######## The rest of the code is not perturbed by different data formats
     ########
-    user_tx_start_date = extract_treatment_start_date(user_input)
-##    print 'user tx start date'
-##    print user_tx_start_date
-    tx_start_date = get_usable_tx_start_date(user_tx_start_date, day_labels)
-##    print 'tx start date'
-##    print tx_start_date
-    last_n_pre_days = get_last_n_pre_days(tx_start_date, day_labels, user_input)
-    last_n_post_days = get_last_n_post_days(tx_start_date, day_labels, user_input)
-    
-    
     find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic) #modify to make excel doc, NOT print
     mav_master_dic = make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic, n_ints_in_mavg)
     all_avg_plots(master_tt_dic)
-    
     plot_n_moving_stdv(day_labels, mouse_nums, times, master_tt_dic, n_stdev)
-
-    get_all_last_2_cycles_moving_stdev(master_tt_dic, tx1_mice, tx2_mice, n_stdev)
+    get_all_last_2_cycles_moving_stdev(master_tt_dic, tx1_mice, tx2_mice, n_stdev) #modify for flexibility!!!
     
     ##################################################################################################
     all_times_dic = make_all_times_dic(filenames, mouse_ids)
+    overall_expt_plot(day_labels, times, tx2_mice, tx1_mice, 1, all_times_dic) #modify for flexibility!!
+    overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, 1, all_times_dic) #modify for flexibility!!
 
-##    plot_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, tx2_mice,
-##                                 tx1_mice, 1, all_times_dic)
-    overall_expt_plot(day_labels, times, tx2_mice, tx1_mice, 1, all_times_dic) 
-##    plot_stdev_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, tx2_mice,
-##                                        tx1_mice, 1, all_times_dic)
-    overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, 1, all_times_dic)
+
+
+    user_tx_start_date = extract_treatment_start_date(user_input)
+    if len(user_tx_start_date) > 0:
+        tx_start_date = get_usable_tx_start_date(user_tx_start_date, day_labels) #this is used in program
+        
+        last_n_pre_days = get_last_n_pre_days(tx_start_date, day_labels, user_input)
+        last_n_post_days = get_last_n_post_days(tx_start_date, day_labels, user_input)
+
+        plot_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, tx2_mice,
+                                     tx1_mice, 1, all_times_dic)
+        plot_stdev_each_treatment_last_days(last_four_pre_days, last_four_post_days, times, tx2_mice,
+                                            tx1_mice, 1, all_times_dic)
     #Make sample frequency a variable
     #Make another function that does moving avg/stdev
     
