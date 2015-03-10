@@ -109,16 +109,31 @@ def extract(filename, data_dict, mouse_ids):
                         data_dict[mouse].append((pt))
     return data_dict
 
-##def extract_treatment_start_date(filename):
-##    """Given a .csv file where the first cell in one of the rows contains the phrase
-##    'treatment started', returns the integer in the cell to the right."""
-##    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
-##    for line in data:
-##        if 'treatment started' in line:
-##            given_start_day = line[1]
-##            tt_dic_start_day = 
+def extract_treatment_start_date(filename):
+    """Given a .csv file where the first cell in one of the rows contains the phrase
+    'treatment started', returns the string in the cell to the right."""
+    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+    for line in data:
+        if 'treatment started' in line[0]: #need line[0], not line, or code won't recognize the line
+            extracted_treatment_start_date = line[1]
+            return extracted_treatment_start_date
 
-
+def extract_last_n_day_pre(filename):
+    """Given a .csv file where the first cell in one of the rows contains the phrase
+    'Analyze last n days pre treatment", returns the integer to the right of that cell."""
+    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+    for line in data:
+        if 'Analyze last n days pre treatment' in line:
+            return int(line[1])
+        
+def extract_last_n_day_post(filename):
+    """Given a .csv file where the first cell in one of the rows contains the phrase
+    "Analyze last n days post treatment", returns the integer to the right of that cell."""
+    data = csv.reader(open(filename, 'rU'), quotechar='"', delimiter = ',')
+    for line in data:
+        if 'Analyze last n days post treatment' in line:
+            return int(line[1])
+        
 def extract_ints_in_mavg(filename):
     """Given a .csv file where the first cell in one of the rows contains the phrase
     'moving average number of points', returns the integer in the cell to the right."""
@@ -257,7 +272,6 @@ def make_all_times_dic(filenames, mouse_ids):
         all_times_dic[day_label(day)] = organized_data
     return all_times_dic
 
-
 def extract_light_cycle_times(filename):
     """Given a .csv file where the first cell in one of the rows contains the phrase
     'Light Cycle', and the first cell of another row contains the phrase, "Dark Cycle",
@@ -358,6 +372,62 @@ def get_cycle_bounds_txt(user_input):
     raw_cycle_bounds = extract_light_cycle_times(user_input)
     cycle_bounds = cycle_bounds_txt(raw_cycle_bounds)
     return cycle_bounds
+
+def get_last_n_pre_days(treatment_start_date, day_labels, filename):
+    """Given a list of strings that are the days (day_labels), and a string that is the date the
+    treatments began (according to tt_dic, NOT actual days since tt_dic days start on the given
+    day's dark cycle and end on the end of the next day's light cycyle, making everything slightly
+    off), and the name of the .csv file that the user modifies, returns a list of strings that are
+    the last n day of the pre treatment. See the file, "read_me_for_user_modify" under the section
+    "Analyze last n days" for more information """
+    n_days_to_analyze = extract_last_n_day_pre(filename) #this is an int
+    count = 0
+    for day in day_labels: #makes list of all days between expt. start and treatment start date
+        count +=1
+        if day == treatment_start_date:
+            all_pre_days = day_labels[0:count+1]
+            n_pre_days = all_pre_days[-n_days_to_analyze:len(all_pre_days)-1]
+            #makes new list of days counting back from treatment day that's n_days_to_analyze long
+            #list does include treatment_start_date, but because of the way the data is
+            #structured, ends up analyzing that first light cycle the treatment starts on
+            return n_pre_days
+
+def get_last_n_post_days(treatment_start_date, day_labels, filename):
+    """Given a list of strings that are the days (day_labels), and a string that is the date the
+    treatments began (according to tt_dic, NOT actual days since tt_dic days start on the given
+    day's dark cycle and end on the end of the next day's light cycyle, making everything slightly
+    off), and the name of the .csv file that the user modifies, returns a list of strings that are
+    the last n day of the post treatment. See the file, "read_me_for_user_modify" under the section
+    "Analyze last n days" for more information """
+    n_days_to_analyze = extract_last_n_day_post(filename) #this is an int
+    all_post_days = list(day_labels)
+    for day in day_labels: #makes list of all days between expt. start and treatment start date
+        if day != treatment_start_date:
+            all_post_days.remove(day)
+        elif day == treatment_start_date:
+            all_post_days.remove(day)
+            #this removes light cycle treatment starts on (and the previous dark cycle)
+            n_post_days = all_post_days[-n_days_to_analyze:len(all_post_days)]
+            #makes new list of days counting back n_days_to_analyze long from end of expt
+            return n_post_days
+    
+def get_usable_tx_start_date(tx_start_date, day_labels):
+    """Given a string that is the date the differing treatments started and a list of strings that
+    are all of the days in order, returns the day before the day the user gives in the modifiable
+    .csv file. This is necessary because the treatments usually start in the light cycle, which when
+    in the tt_dic format are now mapped to the day after they actually occur. This helps to solve
+    that problem."""
+    count = 0
+    split_tx_day = re.findall(r"[\w']+", tx_start_date)
+    #\w splits on anything not a number or letter 
+    for day in day_labels:
+        split_day = re.findall(r"[\w']+", day) #this is so the characters btw. numbers don't matter
+        if split_day[1] == split_tx_day[1]: #ensures same day of the month
+            if split_day[0] == split_tx_day[0]: #ensures same month
+                return day_labels[count-1] #ordering works because of 'light only' day
+            else: count += 1
+        else:
+            count += 1
 
 def separate_light_dark_txt(data_dict, mouse, user_input):
     """Given data_dict (a dict where keys are mouse IDs mapped to a list of tt tuples), and a
@@ -999,7 +1069,6 @@ def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_freque
     plt.ylabel('Stdev CBT in deg C')
     plt.savefig('stdev_temp_per_pt_entire_expt.png')
     
-    
 #################
 #### MAIN
 #################
@@ -1025,7 +1094,7 @@ def main():
     #this defines how many points to be used in calculating moving averages
     
     n_stdev = extract_ints_in_moving_stdev(user_input)
-    #this defines how many points to be used in calculating moving standard deviation
+    #this defines how many points to be used in calculating moving standard deviation 
 
     times = ["Dark Cycle", "Light Cycle"]
 
@@ -1042,6 +1111,7 @@ def main():
         master_tt_dic = refit_to_master_tt_dic(calibrated_tt_dict, mouse_ids, user_input)
         day_labels = sort_day_labels(master_tt_dic.keys()) ##change to properly order
         print day_labels
+        print
         
         ##NOTE that function to create last_four_days has not been created yet, so not plotted
         
@@ -1052,17 +1122,28 @@ def main():
         #mouse ids is a list of strings from the csv files with data
         day_labels = [ '8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14', '8-15-14',
                        '8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
-        last_four_pre_days = ['8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14']
-        #throw out dark cycle of 8-11 light only because it has no data
-        #throw out light cycle of 8-14 file because this is first round of treatment
-        last_four_post_days = ['8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
-        #throw out light cycle of 8-20 because it's not a full cycle
-        master_tt_dic = make_master_tt_dic(filenames, mouse_ids)
         
+##        last_four_pre_days = ['8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14']
+##        #throw out dark cycle of 8-11 light only because it has no data
+##        #throw out light cycle of 8-14 file because this is first round of treatment
+##        
+##        last_four_post_days = ['8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
+##        #throw out light cycle of 8-20 because it's not a full cycle
+        master_tt_dic = make_master_tt_dic(filenames, mouse_ids)
+    
     ########
     ######## The rest of the code is not perturbed by different data formats
     ########
-        
+    user_tx_start_date = extract_treatment_start_date(user_input)
+##    print 'user tx start date'
+##    print user_tx_start_date
+    tx_start_date = get_usable_tx_start_date(user_tx_start_date, day_labels)
+##    print 'tx start date'
+##    print tx_start_date
+    last_n_pre_days = get_last_n_pre_days(tx_start_date, day_labels, user_input)
+    last_n_post_days = get_last_n_post_days(tx_start_date, day_labels, user_input)
+    
+    
     find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic) #modify to make excel doc, NOT print
     mav_master_dic = make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic, n_ints_in_mavg)
     all_avg_plots(master_tt_dic)
