@@ -5,10 +5,12 @@
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
 
 \f0\fs24 \cf0 Treatment n\
+\
 All rows that have the word \'93treatment\'94 allow user to enter mice numbers to the right (starting in column B, and entering one mouse number per cell). If there are no mice in a given treatment group, DO NOT enter anything in that row. Delete the example mouse numbers and leave those cells blank if there are no mice in a 3rd, 4th, etc. treatment group. You can add more treatment groups, just make sure that the word \'93treatment\'94 is in column A. You can delete empty treatment group rows if you wish.\
 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 moving average number of points\
+\
 The mean is calculated with a tool called np.mean (it simply calculates the mean of the numbers it is given).\
 Do not alter the cell labeled \'93moving average number of points\'94. The code relies on those exact words with that exact same capitalization, etc. The line that it\'92s on does not matter though. \
 To the right of this cell, type the number of points you wish to be analyzed when calculating a moving average. \
@@ -22,6 +24,7 @@ Numbers at the edges of data being analyzed will simply have fewer points in the
 \cf0 \
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural
 \cf0 moving standard deviation number of points\
+\
 The standard deviation is calculated with scipy.stats.tstd, which calculates the sample standard deviation of the numbers it is given.\
 Do not alter the cell labeled \'93moving standard deviation number of points\'94. The code relies on those exact words with that exact same capitalization, etc. The line that it\'92s on does not matter though. \
 To the right of this cell, type the number of points you wish to be analyzed when calculating a standard deviation. \
@@ -30,6 +33,23 @@ You must enter a number for the program to work.\
 If you enter an even number, 4 for example, it will take two points before the point in question, two points after the point in question, and the point in question itself. \
 If you enter an odd number, 5 for example, it will take two points before the point in question, two points after the point in question, and the point in question itself.\
 Numbers at the edges of data being analyzed will simply have fewer points in the calculated standard deviation. \
+\
+Date treatment started\
+\
+The date you enter here MUST match the exact format of the dates given in your data (though whether or not you use a - or / between numbers doesn\'92t matter). If your data gives dates in the format x-xx-xx, use that exact same format. If your data gives dates in the format xx-xx-xxxx, use that exact same format. Otherwise your code will not work!!\
+The date you enter here is the date you began different treatments on your subjects. The code assumes that whatever day you enter, the treatment started on the light cycle of that day.\
+\
+Analyze last n days\
+\
+The integers you choose will take the last n days of the pre-treatment period, and the last m days of the post-treatment. This is helpful if you want to focus on data with minimal interference from the stress of the mouse adjusting to the new situation (in the pre-treatment, they\'92ll be getting used to the environment/vehicle shots, and in the post-treatment, your treatment mice could be adjusting to the drug).\
+Ex. If your experiment spans from 1-1-11 to 1-14-11, and your treatment started on the light cycle of 1-6-11, and you chose to analyze the last 2 day of the pre treatment time, the code would analyze the dark cycle of 1-4-11, the light and dark cycle of 1-5-11, and the light cycle of 1-6-11. You should ignore that last light cycle, as that is when the treatment starts. PLEASE NOTE- Because of the way the code is currently structured, the light cycles you see labeled in the outputs actually correspond to the previous day. This means that the light cycle of 1-6-11 is labeled the light cycle of 1-5-11.\
+In the same hypothetical experiment, if you chose to analyze the last 3 days of the post treatment time, the code would analyze the dark cycle of 1-11-11, the light and dark cycles of 1-12-11 and 1-13-11, and the partial light cycle of 1-14-11 (assuming your experiment stops sometime in the light cycle of 1-14-11). \
+\
+\
+ASSUMPTIONS ABOUT DATA\
+First day\'92s recordings start on light cycle time\
+Last day\'92s recordings end on light cycle time\
+Light cycle begins before 10am and ends before midnight\
 \
 \
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural
