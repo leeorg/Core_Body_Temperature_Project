@@ -26,6 +26,24 @@ import scipy
 from scipy import stats
 import collections
 
+def clean_all_csv_files(all_csv_data_files):
+    """Given a csv file, creates a new .csv file with "clean_" preceding the old .csv filename.
+    Newly created file is identical to the original, but all rows before the occurence of the phrase
+    "Deg. C Date" are deleted. This function is necessary for later uses of dictreader."""
+    for filename in all_csv_data_files:
+        if "clean" in filename:
+            pass
+        else:
+            count = 0
+            f = csv.reader(open(filename, "rU")) #opens the original file given
+            write = csv.writer(open("clean_" + filename, "wb"),delimiter=',') #creates new, empty file
+            for row in f:
+                #Once the phrase "Veh Deg. C Date" occurs, takes that row and all rows below it
+                if any("Deg. C Date" in s for s in row):
+                    count += 1
+                if count > 0:
+                    write.writerow(row)
+
 def get_data_file_names(): 
     """Returns list of strings of .csv/.TXT data files in the directory the code is being run in that
     don't have "user" or "test" in their title but do have '.csv', 'CBT ' (NOTE space after 'CBT'!!)
@@ -45,33 +63,68 @@ def get_data_file_names():
             data_files.append(f)
     return data_files
 
-def get_all_mouse_ids_csv(filenames): ##Change this for raw csv!This is temporary!!!
-    """Looks at all .csv data files and extracts the mouse ids from them"""
-    mouse_ids = set()
-    for title in filenames:
-        match = re.search(r'-\d+.+csv\Z', title)
-        # \d is any number 0-9
-        #+ means 1 or more of the preceding character
-        # . means any character other than new line
-        # \Z means at the end of the line
-        if match:
-            data = csv.reader(open(title, 'rU'), quotechar='"', delimiter = ',')
-            for line in data:
+def get_clean_data_file_names():
+    """Returns a list of strings of .csv files in the directory that have the phrase "clean_" in
+    the title. This is needed to collect data only from the clean .csv data files so we can then
+    utilize dictreader."""
+    clean_data_files = []
+    files = [f for f in os.listdir('.') if os.path.isfile(f)]
+    for f in files:
+        if 'clean_' in f:
+            clean_data_files.append(f)
+    return clean_data_files
+
+def get_all_mouse_ids_csv(filenames):
+    """Given a list of csv files in which the first row of each file contains the mouse ids in the
+    format "# Deg. C Data", returns a set of mouse ids as they appear in the file."""
+    mouse_ids = set() #type is set() to ensure each id only appears once
+    for f in filenames:
+        count = 0   #counts ensure no time wasted iterating thru whole file, only 1st row analyzed
+        data = csv.reader(open(f, 'rU'), quotechar='"', delimiter = ',')
+        for line in data:
+            count += 1
+            if count == 1:
                 for string in line:
                     m = re.search('[0-9]{1} [a-zA-Z]+ Deg. C Data', string)
-                    found ="" 
+                    found = ""
                     if m:
-                        found = m.group()
+                        #string is originally in format like "10 Veh Deg. C Data"
+                        #.split() splits on space and makes list of string, takes 1st item
                         mouse_ids.add(string)
-                else: pass
+            elif count <1:
+                break   #exits this for loop and goes to first for loop
     #doesn't truly sort, puts '10 nnn' before '2 nnn' for example, but doesn't need to be sorted
-    return sorted(mouse_ids)
+    return sorted(mouse_ids)    #note: type is now list
+
+def clean_mouse_ids(mouse_ids):
+    """Given a list of mouse IDs in the form of "10 Veh Deg. C Data" (the number and the word
+    "Veh" may be different depending on the experiment)."""
+    first_items = set([])
+    for mouse in mouse_ids:
+        first_items.add(mouse.split()[0])
+    return sorted(first_items) #returns sorted list (not truly sorted, as '10' is before '2'
+        
+def get_csv_day_labels(lst_clean_csv_files):
+    """Given a list of strings that are the names of the cleaned csv data files, returns a sorted
+    list of each date in the experiment (found by looking at the left-most column cells in each
+    file given. There are no repeated days in the list: each only occurs once."""
+    day_labels = set()   #type is set() to ensure each label only appears once
+    for f in lst_clean_csv_files:
+        count = 0
+        data = csv.reader(open(f, 'rU'), quotechar='"', delimiter = ',')
+        for line in data:
+            count += 1
+            if count > 1:
+                day_labels.add(line[0])
+    return sorted(day_labels)   #note: type is now list
+    
 
 def day_label(day):
-    """Given a string that is the filename, isolates the date and returns date in string format"""
+    """Given a string that is the filename, isolates the date and returns date in string format.
+    NOTE: this assumes the date is before the first comma, after the phrase "clean_"  """
     split_file_name = [x.strip() for x in day.split(',')]
     file_date = split_file_name[0]
-    return file_date
+    return file_date.split('_')[1]
 
 def sort_day_labels(unsorted_day_labels):
     """Given a list of strings that are day labels (where the first date also has an entry
@@ -101,7 +154,7 @@ def extract(filename, data_dict, mouse_ids):
         for mouse in mouse_ids:     
             if mouse in row:
                 if row[mouse] != 'NaN':#cleaning data by ignoring points with no temp
-                    if "2 Veh Deg. C Time" in row:
+                    if "2 Veh Deg. C Time" in row:   ####make a variable!!!! TEMPORARY
                         pt = (row['2 Veh Deg. C Time'] , float(row[mouse]) )   #makes (time, temp)
                         data_dict[mouse].append((pt))
                     elif "2 Acyline Deg. C Time" in row:
@@ -230,13 +283,15 @@ def make_master_tt_dic(filenames, mouse_ids):
         organized_data = {}
         for mouse in mouse_ids:
             data_dict[mouse]= []  #Makes empty list for mouse if there's no data for mouse that day
-        extract(day, data_dict, mouse_ids)
+        extract(day, data_dict, mouse_ids)   #fleshes out data_dict
         for mouse in mouse_ids:
+            num_mouse = mouse.split()[0]
             if len(data_dict[mouse]) > 0:   #ensures mice with no data don't get included
-                if mouse_label(mouse) != '8':
-                    if mouse_label(mouse) != '19':
-                        if mouse_label(mouse) != '20':
-                            organized_data[mouse_label(mouse)] = separate_light_dark(data_dict, mouse)
+##                if mouse_label(mouse) != '8':
+##                    if mouse_label(mouse) != '19':
+##                        if mouse_label(mouse) != '20':
+##                            organized_data[mouse_label(mouse)] = separate_light_dark(data_dict, mouse)
+                organized_data[num_mouse] = separate_light_dark(data_dict, mouse)
         master_tt_dic[day_label(day)] = organized_data
     return master_tt_dic
 
@@ -502,6 +557,49 @@ def calibrate_data(data_files, master_tt_dic):
                 #as given by manufacturer: Corrected Temp = (Measured temp - intercept)*(Slope)
     return calibrated_raw_tt_dict
 
+##def refit_to_master_tt_dic(calibrated_tt_dic, mouse_ids, user_input): 
+##    """Takes a tt_dic still mapped to its original days (what appears in the raw .txt data) and
+##    shifts the data to conform to the .csv way of organizing data, where the light cycle now belongs
+##    to the previous day's entry, and the dark cycle between midnight and morning belongs to the
+##    previous day as well. The only mapping that stays the same is the dark cycle between evening and
+##    midnight. This function assumes that the first day begins recording in the light cycle and the
+##    last day stops recording in the light cycle."""
+##    master_tt_dic = {}
+##
+##    cycle_bounds = get_cycle_bounds_txt(user_input)           
+##    earliest_light = cycle_bounds['Light Cycle'][0]
+##    latest_light = cycle_bounds['Light Cycle'][1]
+##    
+##    #determines what days the raw data recorded, and makes new list of days for master_tt_dic to use
+##    all_days = sorted(calibrated_tt_dic.keys())
+##    
+##    #building master_tt_dic structure
+##    #this is preferable to setdefault due to different day keys btw the two dictionaries
+##    ##CHECK IF THIS IS STILL NECESSARY (temporary)
+##    for day in all_days:
+##        master_tt_dic[day] = {}
+##        for mouse in mouse_ids:
+##            master_tt_dic[day][mouse]={}
+##            master_tt_dic[day][mouse]['Dark Cycle'] = [] 
+##            master_tt_dic[day][mouse]['Light Cycle'] = []                
+##    #sort into correct bins        
+##    count=0
+##    for day in all_days:
+##        for mouse in calibrated_tt_dic[day]:
+##            for cycle in calibrated_tt_dic[day][mouse]:
+##                for tt in calibrated_tt_dic[day][mouse][cycle]:
+##                    if earliest_light <= tt[0] <= latest_light:
+##                        master_tt_dic[day][mouse]['Light Cycle'].append(tt)
+##                    elif latest_light < tt[0] <= '23:59':
+##                        master_tt_dic[day][mouse]['Dark Cycle'].append(tt)
+##                    elif '00:00' <= tt[0] < earliest_light:
+##                        #this block needed, or count-1 adds 1st day's data to last day
+##                        if count == 0:
+##                            master_tt_dic[all_days[count]][mouse]['Dark Cycle'].append(tt)
+##                        elif count > 0:
+##                            master_tt_dic[all_days[count-1]][mouse]['Dark Cycle'].append(tt)
+##    return master_tt_dic
+
 def refit_to_master_tt_dic(calibrated_tt_dic, mouse_ids, user_input): 
     """Takes a tt_dic still mapped to its original days (what appears in the raw .txt data) and
     shifts the data to conform to the .csv way of organizing data, where the light cycle now belongs
@@ -511,45 +609,50 @@ def refit_to_master_tt_dic(calibrated_tt_dic, mouse_ids, user_input):
     last day stops recording in the light cycle."""
     master_tt_dic = {}
 
-    cycle_bounds = get_cycle_bounds_txt(user_input)
-            
+    cycle_bounds = get_cycle_bounds_txt(user_input)           
     earliest_light = cycle_bounds['Light Cycle'][0]
     latest_light = cycle_bounds['Light Cycle'][1]
     
     #determines what days the raw data recorded, and makes new list of days for master_tt_dic to use
     all_days = sorted(calibrated_tt_dic.keys())
-    all_days_l_edge = sorted(calibrated_tt_dic.keys()) #can't set to all_days b/c rewrites all_days
-    all_days_l_edge.insert(0, all_days_l_edge[0]+'Light Only')
-    #inserts at front of lst, new mapping is needed b/c .insert won't assign new list to variable
-    assert len(all_days)+1 == len(all_days_l_edge)
     
     #building master_tt_dic structure
     #this is preferable to setdefault due to different day keys btw the two dictionaries
-    for day in all_days_l_edge:
-        if day == all_days_l_edge[-1]:
-            pass
-            ##does not include last day because if there is no dark cycle, there is nothing stored
-            ##under that last day, thus code assumes no dark cycle for last day
-        else:
-            master_tt_dic[day] = {}
-            for mouse in mouse_ids:
-                master_tt_dic[day][mouse]={}
-                master_tt_dic[day][mouse]['Dark Cycle'] = [] 
-                master_tt_dic[day][mouse]['Light Cycle'] = []                
+    ##CHECK IF THIS IS STILL NECESSARY (temporary)
+    for day in all_days:
+        master_tt_dic[day] = {}
+        for mouse in mouse_ids:
+            master_tt_dic[day][mouse]={}
+            master_tt_dic[day][mouse]['Dark Cycle'] = [] 
+            master_tt_dic[day][mouse]['Light Cycle'] = []                
     #sort into correct bins        
     count=0
     for day in all_days:
         count += 1
         for mouse in calibrated_tt_dic[day]:
+            latest_premidnight = []
             for cycle in calibrated_tt_dic[day][mouse]:
                 for tt in calibrated_tt_dic[day][mouse][cycle]:
                     if earliest_light <= tt[0] <= latest_light:
-                        master_tt_dic[all_days_l_edge[count-1]][mouse]['Light Cycle'].append(tt)
-                    elif '00:00' <= tt[0] < earliest_light:
-                        master_tt_dic[all_days_l_edge[count-1]][mouse]['Dark Cycle'].append(tt)
+                        master_tt_dic[day][mouse]['Light Cycle'].append(tt)
                     elif latest_light < tt[0] <= '23:59':
-                        master_tt_dic[all_days_l_edge[count]][mouse]['Dark Cycle'].append(tt)
-        
+                        latest_premidnight.append(tt)
+ ##                       master_tt_dic[day][mouse]['Dark Cycle'].append(tt)
+                    elif '00:00' <= tt[0] < earliest_light:
+                        if count < 2:
+                            master_tt_dic[all_days[count-1]][mouse]['Dark Cycle'].append(tt)
+                        elif count >= 2:
+                            master_tt_dic[all_days[count-2]][mouse]['Dark Cycle'].append(tt)
+            t_cnt = 0
+            for time_temp in latest_premidnight:
+                t_cnt +=1
+                master_tt_dic[day][mouse]['Dark Cycle'].insert(t_cnt-1, time_temp)
+                        
+                        #this block needed, or count-1 adds 1st day's data to last day
+##                        if count == 0:
+##                            master_tt_dic[all_days[count]][mouse]['Dark Cycle'].append(tt)
+##                        elif count > 0:
+##                            master_tt_dic[all_days[count-1]][mouse]['Dark Cycle'].append(tt)
     return master_tt_dic     
 
 def list_CBT(day, mouse, cycle, master_tt_dic):
@@ -1049,6 +1152,7 @@ def overall_expt_plot_stdev(day_labels, times, tx2_mice, tx1_mice, sample_freque
 #### MAIN
 #################
     
+    
 def main():
     """This is the main python code that is run in this program."""
     
@@ -1079,31 +1183,44 @@ def main():
     ########
     print
     if '.TXT' in filenames[0]:
-        print "I'm expecting .txt data"
+        print "This program is expecting .txt data"
         print
+        print "Analyzing the following files for experiment data:"
+        for data_file in filenames:
+            print data_file
         mouse_ids = extract_txt_mouse_ids(filenames)
         raw_master_tt_dic = make_raw_master_tt_dic_txt(filenames, user_input)
         calibrated_tt_dict = calibrate_data(filenames, raw_master_tt_dic)
         master_tt_dic = refit_to_master_tt_dic(calibrated_tt_dict, mouse_ids, user_input)
-        day_labels = sort_day_labels(master_tt_dic.keys()) ##change to properly order
-        print day_labels
+##        day_labels = sort_day_labels(master_tt_dic.keys()) ##change to properly order
+        day_labels = sorted(master_tt_dic.keys())
         print
+        print master_tt_dic['02-11-2015']['3']['Dark Cycle'][-10:-1]
         
         ##NOTE that function to create last_four_days has not been created yet, so not plotted
         
     elif '.csv' in filenames[0]:
-        print "I'm expecting .csv data"
+        print "This program is expecting .csv data"
         print
-        mouse_ids = get_all_mouse_ids_csv(filenames)
-        #mouse ids is a list of strings from the csv files with data
-        day_labels = [ '8-11-14 Light only', '8-11-14', '8-12-14', '8-13-14', '8-14-14', '8-15-14',
-                       '8-16-14', '8-17-14', '8-18-14', '8-19-14', '8-20-14']
+        print "Analyzing the following files for experiment data:"
+        clean_all_csv_files(filenames)
+        clean_csv_data_files = get_clean_data_file_names()
+        for clean_file in clean_csv_data_files:
+            print clean_file
+            
+        mouse_ids = get_all_mouse_ids_csv(clean_csv_data_files)
+        #mouse ids is a list of strings (that are digits) from the csv files with data
+        
+ #       day_labels = get_csv_day_labels(clean_csv_data_files)
+        raw_days_tt_dic = make_master_tt_dic(clean_csv_data_files, mouse_ids)
+        mouse_ids = clean_mouse_ids(mouse_ids)
+        master_tt_dic = refit_to_master_tt_dic(raw_days_tt_dic, mouse_ids, user_input)
+        day_labels = sorted(master_tt_dic.keys())
 
-        master_tt_dic = make_master_tt_dic(filenames, mouse_ids)
-    
     ########
     ######## The rest of the code is not perturbed by different data formats
     ########
+    abablk
     find_all_avgs_ers(day_labels, mouse_nums, times, master_tt_dic) #modify to make excel doc, NOT print
     mav_master_dic = make_mav_master_dic(day_labels, mouse_nums, times, master_tt_dic, n_ints_in_mavg)
     all_avg_plots(master_tt_dic)
