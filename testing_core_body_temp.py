@@ -1,4 +1,4 @@
-from core_body_temp import *
+from core_body_temp_dictorganizedworks import *
 
 CBT_list = [36.6,36.64,36.67,36.7,36.75,36.79,36.82,36.83,36.84,36.88,36.95,37.03,37.07,37.1,37.12,
             37.14,37.16,37.18,37.2, 37.25,37.29,37.34,37.39,37.42,37.43,37.45,37.45,37.45,37.45,37.44,
@@ -40,7 +40,6 @@ def test_n_pt_mavg():
                                      37.157777777777781, 37.12777777777778, 37.098888888888887,
                                      37.074444444444438, 37.060000000000002, 37.048571428571435,
                                      37.038333333333334, 37.031999999999996]
-    print "passed n_pt_mavg"
 
 
 def test_n_moving_stdev():
@@ -87,7 +86,79 @@ def test_n_moving_stdev():
                                               0.044721359549995975, 0.033380918415851051,
                                               0.021369760566432545, 0.016431676725154092]
 
-    print "passed test_n_moving_stdev"
+
+def test_refit_to_master_tt_dic(master_tt_dic):
+    """Uses four specific modified .txt files"""
+    
+    ##Checks all cycles for 02-10-2015 
+    feb = master_tt_dic['02-10-2015']
+    assert feb['1']['Light Cycle'] == [('06:01:00', 35.16), ('17:56:00', 38.08)]
+##    assert feb['1']['Dark Cycle'] == [('18:01:00', 37.88), ('23:56:00', 37.18), ('00:01:00', 37.18),
+##                                      ('05:56:00', 35.87)]
+    assert feb['2']['Light Cycle'] == [('06:01:00', 35.28), ('06:06:00', 35.68), ('14:46:00', 35.89),
+                                       ('14:51:00', 35.78), ('17:56:00', 37.41)]
+##    assert feb['2']['Dark Cycle'] == [('18:01:00', 37.41), ('23:56:00', 35.78), ('00:01:00', 35.58),
+##                                      ('05:56:00', 34.77)]
+    assert feb['3']['Light Cycle'] == [('06:01:00', 35.37), ('06:06:00', 35.37), ('11:56:00', 34.97),
+                                       ('12:01:00', 34.87), ('12:06:00', 34.87), ('17:51:00', 37.29),
+                                       ('17:56:00', 37.29)]
+    assert feb['3']['Dark Cycle'] == [('18:01:00', 37.29), ('23:56:00', 36.38), ('00:01:00', 36.38),
+                                      ('05:56:00', 34.97)]
+    assert feb['4']['Light Cycle']== [('06:01:00', 35.61), ('12:01:00', 36.42), ('17:51:00', 37.94),
+                                      ('17:56:00', 37.94)]
+    assert feb['4']['Dark Cycle'] == [('18:01:00', 37.94), ('18:06:00', 37.94), ('23:51:00', 35.41),
+                                      ('23:56:00', 35.41), ('00:01:00', 35.11), ('00:06:00', 34.9),
+                                      ('05:51:00', 35.11), ('05:56:00', 35.11)]
+    ##Checks all cycles for 02-11-2015
+    feb = master_tt_dic['02-11-2015']
+    assert feb['1']['Light Cycle'] == [('06:01:00', 35.56), ('17:56:00', 37.48)]
+    assert feb['1']['Dark Cycle'] == [('18:01:00', 37.68), ('23:56:00', 36.98), ('00:01:00', 36.87),
+                                      ('05:56:00', 36.87)]
+    assert feb['2']['Light Cycle'] == [('06:01:00', 34.67), ('17:56:00', 36.9)]
+    assert feb['2']['Dark Cycle'] == [('18:01:00', 37.1), ('18:06:00', 37.2), ('23:51:00', 36.8),
+                                      ('23:56:00', 36.6), ('00:01:00', 36.39), ('00:06:00', 36.39),
+                                      ('05:56:00', 34.87)]
+    assert feb['3']['Light Cycle'] == [('06:01:00', 34.87), ('11:56:00', 35.27), ('12:01:00', 35.07),
+                                       ('17:56:00', 36.79)]
+    assert feb['3']['Dark Cycle'] == [('18:01:00', 36.99), ('18:06:00', 37.29), ('23:56:00', 36.59),
+                                      ('00:01:00', 36.89), ('05:56:00', 35.48)]
+    assert feb['4']['Light Cycle'] == [('06:01:00', 35.01), ('12:01:00', 36.12), ('17:51:00', 37.33),
+                                       ('17:56:00', 37.64)]
+    assert feb['4']['Dark Cycle'] == [('18:01:00', 37.54), ('18:06:00', 37.54), ('23:51:00', 37.13),
+                                      ('23:56:00', 36.93), ('00:01:00', 36.63), ('00:06:00', 36.52),
+                                      ('05:51:00', 35.61), ('05:56:00', 35.41)]
+    ##Checks all cycles for 02-12-2015
+    feb = master_tt_dic['02-12-2015']
+    assert feb['1']['Light Cycle'] == [('06:01:00', 36.98), ('17:56:00', 37.58)]
+    assert feb['1']['Dark Cycle'] == [('18:01:00', 37.58), ('23:56:00', 37.08), ('00:01:00', 36.98),
+                                      ('05:56:00', 35.56)]
+    assert feb['2']['Light Cycle'] == [('06:01:00', 34.87), ('17:56:00', 37.2)]
+    assert feb['2']['Dark Cycle'] == [('18:01:00', 37.31), ('23:56:00', 35.68), ('00:01:00', 35.58),
+                                      ('04:46:00', 36.39), ('05:56:00', 35.07)]
+    assert feb['3']['Light Cycle'] == [('06:01:00', 35.27), ('17:56:00', 37.09)]
+    assert feb['3']['Dark Cycle'] == [('18:01:00', 37.09), ('23:56:00', 37.09), ('00:01:00', 37.39),
+                                      ('00:06:00', 37.29), ('05:56:00', 35.27)]
+    assert feb['4']['Light Cycle'] == [('06:01:00', 35.41), ('06:06:00', 35.51), ('11:56:00', 36.93),
+                                       ('12:01:00', 36.83), ('12:06:00', 36.93), ('17:51:00', 37.44),
+                                       ('17:56:00', 37.44)]
+    assert feb['4']['Dark Cycle'] ==[('18:01:00', 37.54), ('18:06:00', 37.44), ('23:51:00', 35.92),
+                                     ('23:56:00', 35.82), ('00:01:00', 35.92), ('00:06:00', 36.02),
+                                     ('05:51:00', 35.92), ('05:56:00', 35.82)]
+
+    ##Checks all cycles for 02-13-2015
+    feb = master_tt_dic['02-13-2015']
+    assert feb['1']['Light Cycle'] == [('06:01:00', 35.46), ('14:21:00', 36.07)]
+    assert feb['1']['Dark Cycle'] == []
+    assert feb['2']['Light Cycle'] == [('06:01:00', 34.87), ('11:11:00', 35.28), ('11:16:00', 35.68)]
+    assert feb['2']['Dark Cycle'] == []
+    assert feb['3']['Light Cycle'] == [('06:01:00', 35.07), ('06:06:00', 34.97), ('11:16:00', 35.78),
+                                       ('11:21:00', 35.78)]
+    assert feb['3']['Dark Cycle'] == []
+    assert feb['4']['Light Cycle'] == [('06:01:00', 36.12), ('06:06:00', 36.02), ('08:26:00', 35.92),
+                                       ('08:31:00', 35.82), ('08:36:00', 35.61)]
+    assert feb['4']['Dark Cycle'] == []
+
+
     
 if __name__ == "__main__":
     print "*******************************************************"
@@ -96,6 +167,28 @@ if __name__ == "__main__":
     print
     test_n_pt_mavg()
     test_n_moving_stdev()
+    
+    ##
+    #Sets up variables
+    ##
+    user_input = 'user_modify.csv'
+    filenames = get_data_file_names()
+    mouse_nums = extract_mouse_nums_to_use(user_input)
+    times = ["Dark Cycle", "Light Cycle"]
+
+    if '.TXT' in filenames[0] or filenames[1] or filenames[2]: #so one .csv and .py aren't issues
+        print "This program is expecting .txt data"
+        print
+        print "Analyzing the following files for experiment data:"
+        for data_file in filenames:
+            print data_file
+        mouse_ids = extract_txt_mouse_ids(filenames)
+        raw_master_tt_dic = make_raw_master_tt_dic_txt(filenames, user_input)
+        calibrated_tt_dict = calibrate_data(filenames, raw_master_tt_dic)
+        master_tt_dic = refit_to_master_tt_dic(calibrated_tt_dict, mouse_ids, user_input)
+
+    ## More tests
+    test_refit_to_master_tt_dic(master_tt_dic)
     print
     print
     print "YAY! All tests have passed!"
